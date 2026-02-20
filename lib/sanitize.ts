@@ -1,0 +1,33 @@
+import type { ResumeData } from "./schema";
+
+/** Strip control characters except newlines and tabs */
+function cleanString(str: string): string {
+  return str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "").trim();
+}
+
+export function sanitizeResumeData(data: ResumeData): ResumeData {
+  return {
+    firstName: cleanString(data.firstName),
+    lastName: cleanString(data.lastName),
+    nickname: data.nickname ? cleanString(data.nickname) : undefined,
+    email: cleanString(data.email),
+    phone: cleanString(data.phone),
+    links: (data.links ?? []).map((link) => ({
+      type: link.type,
+      url: cleanString(link.url),
+    })),
+    summary: cleanString(data.summary),
+    experience: (data.experience ?? []).map((exp) => ({
+      company: cleanString(exp.company),
+      position: cleanString(exp.position),
+      duration: cleanString(exp.duration),
+      description: cleanString(exp.description),
+    })),
+    skills: (data.skills ?? []).map((s) => ({ value: cleanString(s.value) })),
+    certificates: (data.certificates ?? []).map((cert) => ({
+      name: cleanString(cert.name),
+      issuer: cleanString(cert.issuer),
+      year: cert.year ? cleanString(cert.year) : undefined,
+    })),
+  };
+}

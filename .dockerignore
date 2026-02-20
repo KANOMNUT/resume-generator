@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.gitignore
+docs
+PROMPT.md
+*.md
+.env*
+.claude

@@ -1,0 +1,74 @@
+import { z } from "zod";
+
+const linkSchema = z.object({
+  type: z.enum(["git", "portfolio", "linkedin", "other"]),
+  url: z.string().url("Must be a valid URL").max(500, "URL too long"),
+});
+
+const experienceSchema = z.object({
+  company: z
+    .string()
+    .min(1, "Company name is required")
+    .max(200, "Company name too long"),
+  position: z
+    .string()
+    .min(1, "Position is required")
+    .max(200, "Position too long"),
+  duration: z
+    .string()
+    .min(1, "Duration is required")
+    .max(100, "Duration too long"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(1000, "Description too long"),
+});
+
+const certificateSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Certificate name is required")
+    .max(200, "Certificate name too long"),
+  issuer: z
+    .string()
+    .min(1, "Issuer is required")
+    .max(200, "Issuer too long"),
+  year: z.string().max(10, "Year too long").optional().or(z.literal("")),
+});
+
+export const resumeSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(100, "First name too long"),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .max(100, "Last name too long"),
+  nickname: z.string().max(50, "Nickname too long").optional().or(z.literal("")),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Must be a valid email")
+    .max(254, "Email too long"),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .max(30, "Phone number too long"),
+  links: z.array(linkSchema).max(10, "Maximum 10 links"),
+  summary: z
+    .string()
+    .min(1, "Professional summary is required")
+    .max(2000, "Summary too long"),
+  experience: z
+    .array(experienceSchema)
+    .max(20, "Maximum 20 experience entries"),
+  skills: z
+    .array(z.object({ value: z.string().min(1, "Skill cannot be empty").max(100, "Skill too long") }))
+    .max(50, "Maximum 50 skills"),
+  certificates: z
+    .array(certificateSchema)
+    .max(20, "Maximum 20 certificates"),
+});
+
+export type ResumeData = z.infer<typeof resumeSchema>;
