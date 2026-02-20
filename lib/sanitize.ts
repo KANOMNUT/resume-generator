@@ -12,6 +12,8 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
     nickname: data.nickname ? cleanString(data.nickname) : undefined,
     email: cleanString(data.email),
     phone: cleanString(data.phone),
+    // Photo is a validated base64 data URL — pass through without modification
+    photo: data.photo ?? undefined,
     links: (data.links ?? []).map((link) => ({
       type: link.type,
       url: cleanString(link.url),
@@ -22,6 +24,17 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
       position: cleanString(exp.position),
       duration: cleanString(exp.duration),
       description: cleanString(exp.description),
+      projects: (exp.projects ?? []).map((proj) => ({
+        name: cleanString(proj.name),
+        detail: proj.detail ? cleanString(proj.detail) : undefined,
+      })),
+    })),
+    education: (data.education ?? []).map((edu) => ({
+      institution: cleanString(edu.institution),
+      degree: cleanString(edu.degree),
+      fieldOfStudy: edu.fieldOfStudy ? cleanString(edu.fieldOfStudy) : undefined,
+      duration: cleanString(edu.duration),
+      description: edu.description ? cleanString(edu.description) : undefined,
     })),
     skills: (data.skills ?? []).map((s) => ({ value: cleanString(s.value) })),
     certificates: (data.certificates ?? []).map((cert) => ({

@@ -1,6 +1,98 @@
 import { Control, UseFormRegister, FieldErrors, useFieldArray } from "react-hook-form";
 import { ResumeData } from "@/lib/schema";
 
+interface ProjectsListProps {
+  control: Control<ResumeData>;
+  register: UseFormRegister<ResumeData>;
+  errors: FieldErrors<ResumeData>;
+  experienceIndex: number;
+}
+
+function ProjectsList({ control, register, errors, experienceIndex }: ProjectsListProps) {
+  const { fields: projFields, append: appendProject, remove: removeProject } = useFieldArray({
+    control,
+    name: `experience.${experienceIndex}.projects` as const,
+  });
+
+  return (
+    <div className="mt-4">
+      <h4 className="text-sm font-medium text-gray-700 mb-2">Projects</h4>
+      <div className="space-y-3">
+        {projFields.map((projField, projIndex) => (
+          <div
+            key={projField.id}
+            className="bg-blue-50 border border-blue-100 rounded-lg p-3"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-blue-700">
+                Project {projIndex + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => removeProject(projIndex)}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                Remove
+              </button>
+            </div>
+            <div className="space-y-2">
+              <div>
+                <label
+                  htmlFor={`experience.${experienceIndex}.projects.${projIndex}.name`}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Project Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id={`experience.${experienceIndex}.projects.${projIndex}.name`}
+                  type="text"
+                  {...register(`experience.${experienceIndex}.projects.${projIndex}.name`)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+                  placeholder="Project Name"
+                />
+                {errors.experience?.[experienceIndex]?.projects?.[projIndex]?.name && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.experience[experienceIndex]?.projects?.[projIndex]?.name?.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor={`experience.${experienceIndex}.projects.${projIndex}.detail`}
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Details / Technologies <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  id={`experience.${experienceIndex}.projects.${projIndex}.detail`}
+                  {...register(`experience.${experienceIndex}.projects.${projIndex}.detail`)}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white resize-vertical"
+                  placeholder="Describe the project, technologies used, your role..."
+                />
+                {errors.experience?.[experienceIndex]?.projects?.[projIndex]?.detail && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {errors.experience[experienceIndex]?.projects?.[projIndex]?.detail?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {projFields.length < 10 && (
+        <button
+          type="button"
+          onClick={() => appendProject({ name: "", detail: "" })}
+          className="mt-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-lg px-3 py-1.5"
+        >
+          Add Project
+        </button>
+      )}
+    </div>
+  );
+}
+
 interface ExperienceSectionProps {
   control: Control<ResumeData>;
   register: UseFormRegister<ResumeData>;
@@ -24,6 +116,7 @@ export default function ExperienceSection({
         position: "",
         duration: "",
         description: "",
+        projects: [],
       });
     }
   };
@@ -135,6 +228,13 @@ export default function ExperienceSection({
                   </p>
                 )}
               </div>
+
+              <ProjectsList
+                control={control}
+                register={register}
+                errors={errors}
+                experienceIndex={index}
+              />
             </div>
           </div>
         ))}

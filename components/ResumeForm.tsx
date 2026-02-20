@@ -8,12 +8,14 @@ import PersonalInfoSection from "./PersonalInfoSection";
 import LinksSection from "./LinksSection";
 import SummarySection from "./SummarySection";
 import ExperienceSection from "./ExperienceSection";
+import EducationSection from "./EducationSection";
 import SkillsSection from "./SkillsSection";
 import CertificatesSection from "./CertificatesSection";
 
 export default function ResumeForm() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
 
   const {
     register,
@@ -31,6 +33,7 @@ export default function ResumeForm() {
       links: [],
       summary: "",
       experience: [],
+      education: [],
       skills: [],
       certificates: [],
     },
@@ -43,12 +46,18 @@ export default function ResumeForm() {
     setError(null);
 
     try {
+      // Merge photo into submission payload
+      const submissionData: ResumeData = {
+        ...data,
+        photo: photoBase64 ?? undefined,
+      };
+
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) {
@@ -85,7 +94,12 @@ export default function ResumeForm() {
           </div>
         )}
 
-        <PersonalInfoSection register={register} errors={errors} />
+        <PersonalInfoSection
+          register={register}
+          errors={errors}
+          onPhotoChange={setPhotoBase64}
+          photoPreview={photoBase64}
+        />
 
         <div className="border-t border-gray-200 pt-6">
           <LinksSection control={control} register={register} errors={errors} />
@@ -97,6 +111,10 @@ export default function ResumeForm() {
 
         <div className="border-t border-gray-200 pt-6">
           <ExperienceSection control={control} register={register} errors={errors} />
+        </div>
+
+        <div className="border-t border-gray-200 pt-6">
+          <EducationSection control={control} register={register} errors={errors} />
         </div>
 
         <div className="border-t border-gray-200 pt-6">

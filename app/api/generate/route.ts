@@ -3,8 +3,8 @@ import { resumeSchema } from "@/lib/schema";
 import { sanitizeResumeData } from "@/lib/sanitize";
 import { generateResumePDF } from "@/lib/pdf-generator";
 
-// Maximum allowed request body size (512KB)
-const MAX_BODY_SIZE = 512000;
+// Maximum allowed request body size (2MB — accommodates base64-encoded photo)
+const MAX_BODY_SIZE = 2097152;
 
 /**
  * POST /api/generate

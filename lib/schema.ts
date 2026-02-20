@@ -22,6 +22,46 @@ const experienceSchema = z.object({
     .string()
     .min(1, "Description is required")
     .max(1000, "Description too long"),
+  projects: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .min(1, "Project name is required")
+          .max(200, "Project name too long"),
+        detail: z
+          .string()
+          .max(2000, "Project detail too long")
+          .optional()
+          .or(z.literal("")),
+      })
+    )
+    .max(10, "Maximum 10 projects per experience"),
+});
+
+const educationSchema = z.object({
+  institution: z
+    .string()
+    .min(1, "Institution is required")
+    .max(200, "Institution name too long"),
+  degree: z
+    .string()
+    .min(1, "Degree is required")
+    .max(200, "Degree too long"),
+  fieldOfStudy: z
+    .string()
+    .max(200, "Field of study too long")
+    .optional()
+    .or(z.literal("")),
+  duration: z
+    .string()
+    .min(1, "Duration is required")
+    .max(100, "Duration too long"),
+  description: z
+    .string()
+    .max(1000, "Description too long")
+    .optional()
+    .or(z.literal("")),
 });
 
 const certificateSchema = z.object({
@@ -55,6 +95,14 @@ export const resumeSchema = z.object({
     .string()
     .min(1, "Phone number is required")
     .max(30, "Phone number too long"),
+  photo: z
+    .string()
+    .max(600000, "Photo file is too large (max ~450KB)")
+    .refine(
+      (val) => /^data:image\/(jpeg|jpg|png|webp);base64,/.test(val),
+      "Photo must be a valid JPEG, PNG, or WebP image"
+    )
+    .optional(),
   links: z.array(linkSchema).max(10, "Maximum 10 links"),
   summary: z
     .string()
@@ -63,6 +111,9 @@ export const resumeSchema = z.object({
   experience: z
     .array(experienceSchema)
     .max(20, "Maximum 20 experience entries"),
+  education: z
+    .array(educationSchema)
+    .max(10, "Maximum 10 education entries"),
   skills: z
     .array(z.object({ value: z.string().min(1, "Skill cannot be empty").max(100, "Skill too long") }))
     .max(50, "Maximum 50 skills"),
