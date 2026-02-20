@@ -22,7 +22,7 @@ const PAGE_HEIGHT = 841.89; // A4 height in points
 const CONTENT_WIDTH = PAGE_WIDTH - MARGINS.left - MARGINS.right;
 
 // Photo dimensions
-const PHOTO_SIZE = 200; // 110pt square
+const PHOTO_SIZE = 150; // 150pt square
 const PHOTO_GAP = 12; // gap between photo and text
 
 // Font sizes
