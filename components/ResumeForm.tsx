@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormSetValue } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema, type ResumeData } from "@/lib/schema";
 import PersonalInfoSection from "./PersonalInfoSection";
@@ -9,6 +9,7 @@ import LinksSection from "./LinksSection";
 import SummarySection from "./SummarySection";
 import ExperienceSection from "./ExperienceSection";
 import EducationSection from "./EducationSection";
+import LanguagesSection from "./LanguagesSection";
 import SkillsSection from "./SkillsSection";
 import CertificatesSection from "./CertificatesSection";
 
@@ -20,6 +21,7 @@ export default function ResumeForm() {
   const {
     register,
     control,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm<ResumeData>({
@@ -34,6 +36,7 @@ export default function ResumeForm() {
       summary: "",
       experience: [],
       education: [],
+      languages: [],
       skills: [],
       certificates: [],
     },
@@ -110,11 +113,15 @@ export default function ResumeForm() {
         </div>
 
         <div className="border-t border-gray-200 pt-6">
-          <ExperienceSection control={control} register={register} errors={errors} />
+          <ExperienceSection control={control} register={register} errors={errors} setValue={setValue} />
         </div>
 
         <div className="border-t border-gray-200 pt-6">
           <EducationSection control={control} register={register} errors={errors} />
+        </div>
+
+        <div className="border-t border-gray-200 pt-6">
+          <LanguagesSection control={control} register={register} errors={errors} />
         </div>
 
         <div className="border-t border-gray-200 pt-6">

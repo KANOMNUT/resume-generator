@@ -3,6 +3,7 @@ import { z } from "zod";
 const linkSchema = z.object({
   type: z.enum(["git", "portfolio", "linkedin", "other"]),
   url: z.string().url("Must be a valid URL").max(500, "URL too long"),
+  otherLabel: z.string().max(50, "Label too long").optional().or(z.literal("")),
 });
 
 const experienceSchema = z.object({
@@ -14,10 +15,11 @@ const experienceSchema = z.object({
     .string()
     .min(1, "Position is required")
     .max(200, "Position too long"),
-  duration: z
-    .string()
-    .min(1, "Duration is required")
-    .max(100, "Duration too long"),
+  startMonth: z.string().min(1, "Start month is required").max(20, "Invalid month"),
+  startYear: z.string().min(1, "Start year is required").max(4, "Invalid year"),
+  endMonth: z.string().max(20, "Invalid month").optional().or(z.literal("")),
+  endYear: z.string().max(4, "Invalid year").optional().or(z.literal("")),
+  isCurrent: z.boolean(),
   description: z
     .string()
     .min(1, "Description is required")
@@ -62,6 +64,13 @@ const educationSchema = z.object({
     .max(1000, "Description too long")
     .optional()
     .or(z.literal("")),
+});
+
+const languageSchema = z.object({
+  language: z.string().min(1, "Language is required").max(100, "Language name too long"),
+  level: z.enum(["native", "fluent", "advanced", "intermediate", "basic"], {
+    error: "Please select a proficiency level",
+  }),
 });
 
 const certificateSchema = z.object({
@@ -114,6 +123,7 @@ export const resumeSchema = z.object({
   education: z
     .array(educationSchema)
     .max(10, "Maximum 10 education entries"),
+  languages: z.array(languageSchema).max(20, "Maximum 20 languages"),
   skills: z
     .array(z.object({ value: z.string().min(1, "Skill cannot be empty").max(100, "Skill too long") }))
     .max(50, "Maximum 50 skills"),

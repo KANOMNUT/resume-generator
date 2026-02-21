@@ -18,7 +18,7 @@ Resume Generator is a single-page application built with Next.js 16 (App Router)
 
 ## Features
 
-- Single-page form with dynamic, repeatable sections (experience, education, links, skills, certificates)
+- Single-page form with dynamic, repeatable sections (experience, education, links, skills, certificates, languages)
 - Instant PDF generation server-side using PDFKit — A4 layout with photo support
 - Shared Zod 4 schema for client-side and server-side validation
 - Input sanitization — control characters stripped from all string fields
@@ -26,6 +26,9 @@ Resume Generator is a single-page application built with Next.js 16 (App Router)
 - Responsive, mobile-first UI built with Tailwind CSS 4
 - Double-submission prevention with loading states
 - Production-ready Docker image via three-stage build
+- Languages section for listing spoken languages with proficiency levels
+- Work experience dates use structured month/year dropdowns with a "Currently work here" checkbox that shows "Present" in the PDF
+- Professional links use "Git Repo" as the label for git-type links; selecting "Other" reveals a custom label input
 
 ---
 
@@ -123,6 +126,7 @@ resume-generate/
 │   ├── SummarySection.tsx          # Professional summary textarea
 │   ├── ExperienceSection.tsx       # Dynamic work experience with nested projects
 │   ├── EducationSection.tsx        # Dynamic education entries
+│   ├── LanguagesSection.tsx        # Dynamic languages with proficiency level
 │   ├── SkillsSection.tsx           # Dynamic skills list
 │   └── CertificatesSection.tsx     # Dynamic certificate entries
 ├── lib/
@@ -157,10 +161,11 @@ resume-generate/
 
 ### Professional Links (dynamic, max 10)
 
-| Field | Required | Notes                                     |
-|-------|----------|-------------------------------------------|
-| Type  | Yes      | One of: `git`, `portfolio`, `linkedin`, `other` |
-| URL   | Yes      |                                           |
+| Field        | Required | Notes                                                                                  |
+|--------------|----------|----------------------------------------------------------------------------------------|
+| Type         | Yes      | One of: `git` (labelled "Git Repo"), `portfolio`, `linkedin`, `other`                 |
+| Custom Label | No       | Text input shown only when type is "other"; used as the link label in the PDF          |
+| URL          | Yes      |                                                                                        |
 
 ### Professional Summary
 
@@ -172,12 +177,18 @@ Rendered in the PDF with a paragraph indent.
 
 ### Work Experience (dynamic, max 20 entries)
 
-| Field       | Required | Max Length  |
-|-------------|----------|-------------|
-| Company     | Yes      |             |
-| Position    | Yes      |             |
-| Duration    | Yes      |             |
-| Description | Yes      | 1,000 chars |
+| Field                | Required | Notes                                                      |
+|----------------------|----------|------------------------------------------------------------|
+| Company              | Yes      |                                                            |
+| Position             | Yes      |                                                            |
+| Start Month          | Yes      | Dropdown: Jan – Dec                                        |
+| Start Year           | Yes      | Dropdown: 2027 – 1960                                      |
+| End Month            | No       | Dropdown: Jan – Dec; disabled when "Currently work here" is checked |
+| End Year             | No       | Dropdown: 2027 – 1960; disabled when "Currently work here" is checked |
+| Currently Work Here  | No       | Checkbox; when checked, end date is disabled and PDF shows "Present" |
+| Description          | Yes      | Max 1,000 chars                                            |
+
+PDF duration format: `"Jan 2020 – Present"` or `"Jan 2020 – Dec 2023"`
 
 Each experience entry supports nested **Projects** (dynamic, max 10 per entry):
 
@@ -195,6 +206,13 @@ Each experience entry supports nested **Projects** (dynamic, max 10 per entry):
 | Field of Study         | No       |             |
 | Duration               | Yes      |             |
 | Description / Activities | No     | 1,000 chars |
+
+### Languages (dynamic, max 20 entries)
+
+| Field    | Required | Notes                                            |
+|----------|----------|--------------------------------------------------|
+| Language | Yes      | e.g., English, Thai                              |
+| Level    | Yes      | Native / Fluent / Advanced / Intermediate / Basic |
 
 ### Skills (dynamic, max 50)
 
@@ -234,14 +252,19 @@ Maximum request body size: 2 MB.
   "photo": "<base64-encoded-image-optional>",
   "links": [
     { "type": "linkedin", "url": "https://linkedin.com/in/janesmith" },
-    { "type": "git",      "url": "https://github.com/janesmith" }
+    { "type": "git",      "url": "https://github.com/janesmith" },
+    { "type": "other",    "url": "https://janesmith.dev", "otherLabel": "Blog" }
   ],
   "summary": "Experienced software engineer specialising in...",
   "experience": [
     {
       "company": "Acme Corp",
       "position": "Senior Engineer",
-      "duration": "Jan 2021 – Present",
+      "startMonth": "Jan",
+      "startYear": "2021",
+      "endMonth": "",
+      "endYear": "",
+      "isCurrent": true,
       "description": "Led development of...",
       "projects": [
         {
@@ -260,6 +283,10 @@ Maximum request body size: 2 MB.
       "description": "Dean's List, ACM Club"
     }
   ],
+  "languages": [
+    { "language": "English", "level": "native" },
+    { "language": "Thai",    "level": "intermediate" }
+  ],
   "skills": [
     { "value": "TypeScript" },
     { "value": "React" }
@@ -276,6 +303,7 @@ Maximum request body size: 2 MB.
 |--------|--------------------|------------------------------------------------------------|
 | 200    | `application/pdf`  | PDF file; `Content-Disposition: attachment; filename="resume.pdf"` |
 | 400    | `application/json` | Zod validation error with field-level detail               |
+| 413    | `application/json` | Request body exceeds 2 MB limit                            |
 | 500    | `application/json` | PDF generation failed                                      |
 
 ---
@@ -288,7 +316,7 @@ Page size: A4 (595 × 842 pt). Margins: 50 pt all sides. Font: Helvetica (built-
 ┌──────────────────────────────────────┬──────────┐
 │  FULL NAME (Nickname)                │  [photo] │
 │  email | phone                       │  110×110 │
-│  Git: url | Portfolio: url           │          │
+│  Git Repo: url | Portfolio: url      │          │
 ├──────────────────────────────────────┴──────────┤
 │  PROFESSIONAL SUMMARY                           │
 │  ─────────────────────────────────────────────  │
@@ -308,6 +336,10 @@ Page size: A4 (595 × 842 pt). Margins: 50 pt all sides. Font: Helvetica (built-
 │  Institution                       Duration     │
 │  Degree — Field of Study (italic)               │
 │  Activities description...                      │
+├─────────────────────────────────────────────────┤
+│  LANGUAGES                                      │
+│  ─────────────────────────────────────────────  │
+│  English — Native  •  Thai — Intermediate  •    │
 ├─────────────────────────────────────────────────┤
 │  SKILLS                                         │
 │  ─────────────────────────────────────────────  │
@@ -343,7 +375,7 @@ const nextConfig: NextConfig = {
 
 ### Dynamic Form Sections
 
-All dynamic (repeatable) sections — links, experience, education, skills, and certificates — are managed with `useFieldArray` from React Hook Form. The nested projects sub-section within each experience entry uses a second, nested `useFieldArray` keyed to the parent entry's index.
+All dynamic (repeatable) sections — links, experience, education, languages, skills, and certificates — are managed with `useFieldArray` from React Hook Form. The nested projects sub-section within each experience entry uses a second, nested `useFieldArray` keyed to the parent entry's index.
 
 ### Photo Handling
 
@@ -361,6 +393,7 @@ A single Zod schema defined in `lib/schema.ts` is imported by both the client (R
 | Work Experience  | 20          |
 | Projects per exp.| 10          |
 | Education        | 10          |
+| Languages        | 20          |
 | Skills           | 50          |
 | Certificates     | 20          |
 | Request body     | 2 MB        |

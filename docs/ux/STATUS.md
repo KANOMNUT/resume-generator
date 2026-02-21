@@ -994,3 +994,55 @@ This UX design specification is complete and ready for development handoff.
 **Last Updated:** 2026-02-20
 **Author:** UX/UI Design Team
 **Stakeholder Review:** Pending
+
+---
+
+## Update — 2026-02-21
+
+### New Features Specified
+
+#### Feature: Link Label Rename + Custom "Other" Label
+- "GitHub" option renamed to "Git Repo" in the link type dropdown
+- When "Other" is selected, a text input appears for a custom label
+- Layout: `[type dropdown] [custom label input (if other)] [URL input] [Remove]`
+
+#### Feature: Languages Section
+**Position:** After Education, before Skills
+
+**Layout per entry:**
+```
+┌─────────────────────────────────────────────────────┐
+│  Language 1                          [Remove]       │
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │ Language *         │  │ Level *            │    │
+│  │ [text input]       │  │ [select dropdown]  │    │
+│  └────────────────────┘  └────────────────────┘    │
+│                                                     │
+│  [+ Add Language]                                   │
+└─────────────────────────────────────────────────────┘
+```
+
+**Level options:** Native, Fluent, Advanced, Intermediate, Basic
+
+#### Feature: Work Experience Duration — Structured Date Pickers + Checkbox
+**Replaces:** Single duration text input
+**New layout per entry (date row):**
+```
+┌─────────────────────────────────────────────────────┐
+│  Start Date *                                       │
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │ [Month dropdown]   │  │ [Year dropdown]    │    │
+│  └────────────────────┘  └────────────────────┘    │
+│                                                     │
+│  End Date                                           │
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │ [Month dropdown]   │  │ [Year dropdown]    │    │
+│  │  (disabled if ✓)   │  │  (disabled if ✓)   │    │
+│  └────────────────────┘  └────────────────────┘    │
+│                                                     │
+│  [✓] Currently work here                           │
+└─────────────────────────────────────────────────────┘
+```
+**Behavior:** Checking "Currently work here" clears end date fields and disables them; PDF renders "Present" for end date.
+
+### Status: Completed

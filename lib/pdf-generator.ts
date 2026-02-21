@@ -65,6 +65,7 @@ export async function generateResumePDF(data: ResumeData): Promise<Buffer> {
       generateProfessionalSummary(doc, data);
       generateWorkExperience(doc, data);
       generateEducation(doc, data);
+      generateLanguages(doc, data);
       generateSkills(doc, data);
       generateCertificates(doc, data);
 
@@ -78,6 +79,23 @@ export async function generateResumePDF(data: ResumeData): Promise<Buffer> {
       );
     }
   });
+}
+
+// Change 1: helper that resolves a link's display label.
+// For type "other" it uses otherLabel when present, falling back to "Other".
+// For known types it returns a formatted label; everything else is capitalizeFirst.
+function getLinkLabel(link: { type: string; otherLabel?: string | "" }): string {
+  if (link.type === "other") {
+    return link.otherLabel && link.otherLabel.trim()
+      ? capitalizeFirst(link.otherLabel.trim())
+      : "Other";
+  }
+  const MAP: Record<string, string> = {
+    git: "Git Repo",
+    portfolio: "Portfolio",
+    linkedin: "LinkedIn",
+  };
+  return MAP[link.type] ?? capitalizeFirst(link.type);
 }
 
 /**
@@ -133,12 +151,12 @@ function generateHeader(doc: PDFKit.PDFDocument, data: ResumeData): void {
       align: "left",
     });
 
-  // Links
+  // Links — Change 1: use getLinkLabel instead of capitalizeFirst(link.type)
   if (data.links && data.links.length > 0) {
     doc.moveDown(0.3);
 
     data.links.forEach((link, index) => {
-      const linkText = `${capitalizeFirst(link.type)}: ${link.url}`;
+      const linkText = `${getLinkLabel(link)}: ${link.url}`;
       doc
         .fillColor(COLORS.BLUE)
         .text(linkText, MARGINS.left, doc.y, {
@@ -214,6 +232,16 @@ function generateWorkExperience(
 
     const currentY = doc.y;
 
+    // Change 2: build duration string from the new start/end month+year fields
+    // instead of the removed exp.duration field.
+    const startLabel = `${exp.startMonth} ${exp.startYear}`;
+    const endLabel = exp.isCurrent
+      ? "Present"
+      : exp.endMonth && exp.endYear
+      ? `${exp.endMonth} ${exp.endYear}`
+      : "";
+    const durationText = endLabel ? `${startLabel} – ${endLabel}` : startLabel;
+
     // Company name (left-aligned)
     doc
       .font("Helvetica-Bold")
@@ -226,7 +254,7 @@ function generateWorkExperience(
       });
 
     // Duration (right-aligned on same line)
-    doc.text(exp.duration, MARGINS.left, currentY, {
+    doc.text(durationText, MARGINS.left, currentY, {
       width: CONTENT_WIDTH,
       align: "right",
     });
@@ -378,6 +406,38 @@ function generateEducation(doc: PDFKit.PDFDocument, data: ResumeData): void {
       doc.moveDown(1);
     }
   });
+
+  doc.moveDown(1.5);
+}
+
+/**
+ * Change 3: Generates the Languages section.
+ * Renders each language as "Language — Level" joined by "  •  ".
+ */
+function generateLanguages(doc: PDFKit.PDFDocument, data: ResumeData): void {
+  if (!data.languages || data.languages.length === 0) return;
+
+  checkPageBreak(doc);
+  addSectionHeader(doc, "LANGUAGES");
+
+  const LEVEL_LABELS: Record<string, string> = {
+    native: "Native",
+    fluent: "Fluent",
+    advanced: "Advanced",
+    intermediate: "Intermediate",
+    basic: "Basic",
+  };
+
+  // Render as "Language — Level  •  Language — Level  •  ..."
+  const langText = data.languages
+    .map((l) => `${l.language} — ${LEVEL_LABELS[l.level] ?? l.level}`)
+    .join("  •  ");
+
+  doc
+    .font("Helvetica")
+    .fontSize(FONT_SIZES.SKILLS)
+    .fillColor(COLORS.DARK_GRAY)
+    .text(langText, { width: CONTENT_WIDTH, align: "left" });
 
   doc.moveDown(1.5);
 }

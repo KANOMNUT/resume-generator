@@ -17,12 +17,17 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
     links: (data.links ?? []).map((link) => ({
       type: link.type,
       url: cleanString(link.url),
+      otherLabel: link.otherLabel ? cleanString(link.otherLabel) : undefined,
     })),
     summary: cleanString(data.summary),
     experience: (data.experience ?? []).map((exp) => ({
       company: cleanString(exp.company),
       position: cleanString(exp.position),
-      duration: cleanString(exp.duration),
+      startMonth: cleanString(exp.startMonth),
+      startYear: cleanString(exp.startYear),
+      endMonth: exp.endMonth ? cleanString(exp.endMonth) : undefined,
+      endYear: exp.endYear ? cleanString(exp.endYear) : undefined,
+      isCurrent: exp.isCurrent,
       description: cleanString(exp.description),
       projects: (exp.projects ?? []).map((proj) => ({
         name: cleanString(proj.name),
@@ -35,6 +40,10 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
       fieldOfStudy: edu.fieldOfStudy ? cleanString(edu.fieldOfStudy) : undefined,
       duration: cleanString(edu.duration),
       description: edu.description ? cleanString(edu.description) : undefined,
+    })),
+    languages: (data.languages ?? []).map((lang) => ({
+      language: cleanString(lang.language),
+      level: lang.level,
     })),
     skills: (data.skills ?? []).map((s) => ({ value: cleanString(s.value) })),
     certificates: (data.certificates ?? []).map((cert) => ({
