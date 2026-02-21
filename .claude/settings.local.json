@@ -7,7 +7,8 @@
       "Bash(npm init:*)",
       "Bash(npm install:*)",
       "Bash(npx next build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx jest --no-coverage 2>&1)"
     ]
   }
 }

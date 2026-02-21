@@ -6,6 +6,7 @@
 - Backend Engineer
 - DevOps Engineer
 - Solution Architect (you)
+- QA Automation Engineer
 - Tech Lead
 
 ---
@@ -229,6 +230,28 @@ Status section required.
 
 ---
 
+## QA Automation Engineer
+
+Tasks:
+- Define test strategy:
+  - Unit tests for validation
+  - Integration tests for API route
+  - E2E test for form submission + PDF download
+- Validate:
+  - Required fields enforcement
+  - Optional fields behavior
+  - Multiple dynamic entries
+  - Proper PDF response headers
+  - No data persistence
+
+Output:
+- Test plan
+- Automation documentation
+
+Status section required.
+
+---
+
 ## Tech Lead
 
 Tasks:
@@ -285,6 +308,7 @@ Each agent must maintain a checkpoint file:
 - `/docs/frontend/STATUS.md`
 - `/docs/backend/STATUS.md`
 - `/docs/devops/STATUS.md`
+- `/docs/qa/STATUS.md`
 - `/docs/tech-lead/STATUS.md`
 
 On resume:
