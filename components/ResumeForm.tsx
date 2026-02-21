@@ -90,7 +90,7 @@ export default function ResumeForm() {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-800">{error}</p>

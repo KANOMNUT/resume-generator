@@ -78,12 +78,78 @@ npm start
 
 ### Scripts
 
-| Command           | Description                  |
-|-------------------|------------------------------|
-| `npm run dev`     | Start development server     |
-| `npm run build`   | Create production build      |
-| `npm start`       | Start production server      |
-| `npm run lint`    | Run ESLint                   |
+| Command                    | Description                                      |
+|----------------------------|--------------------------------------------------|
+| `npm run dev`              | Start development server                         |
+| `npm run build`            | Create production build                          |
+| `npm start`                | Start production server                          |
+| `npm run lint`             | Run ESLint                                       |
+| `npm test`                 | Run unit + integration tests (Jest)              |
+| `npm run test:watch`       | Run Jest in watch mode                           |
+| `npm run test:coverage`    | Run Jest with coverage report (80% gate)         |
+| `npm run test:e2e`         | Run E2E tests (Playwright, auto-starts server)   |
+| `npm run test:e2e:ui`      | Run Playwright in interactive UI mode            |
+| `npm run test:e2e:report`  | Open the last Playwright HTML report             |
+
+---
+
+## Testing
+
+### Test Stack
+
+| Layer              | Tool                      | Tests     |
+|--------------------|---------------------------|-----------|
+| Unit + Integration | Jest + next/jest (SWC)    | 204 tests |
+| E2E                | Playwright (Chromium)     | ~56 tests |
+
+### Quick Start
+
+```bash
+# Unit + integration tests
+npm test
+
+# Unit tests with coverage report (80% threshold enforced)
+npm run test:coverage
+
+# E2E tests — auto-starts the Next.js dev server
+npm run test:e2e
+```
+
+### First-time E2E Setup
+
+```bash
+npx playwright install chromium
+```
+
+### Unit & Integration Tests (`__tests__/`)
+
+- **`schema.test.ts`** — 121 tests: all Zod schema rules, field limits, enum values, array size bounds, photo base64 format validation
+- **`sanitize.test.ts`** — 72 tests: control-character stripping, optional fields coerced to `undefined` on empty input, photo pass-through
+- **`pdf-generator.test.ts`** — 36 tests: Buffer output with correct PDF magic bytes, all PDF sections rendered, `getLinkLabel` helper for all link types, `isCurrent` duration logic
+- **`generate.test.ts`** — 17 tests: API route responses (200 / 400 / 413 / 500), correct response headers, pipeline data flow, short-circuit on validation or sanitization failure
+
+### E2E Tests (`e2e/`)
+
+- **`page-load.spec.ts`** — 14 tests: page render, all section headers visible, Generate PDF button enabled on load, no error banner on initial render
+- **`form-validation.spec.ts`** — 12 tests: required field errors for all five required fields, email format validation, button disabled during in-flight request, API error banner display
+- **`form-submission.spec.ts`** — 10 tests: full PDF download flow with required-only fields, correct filename (`FirstName_LastName_Resume.pdf`), full-form submission with all sections, no data persistence across submissions
+- **`dynamic-sections.spec.ts`** — 20 tests: add/remove for all six dynamic sections (links, experience with nested projects, education, languages, skills, certificates), conditional UI for `isCurrent` checkbox disabling end-date dropdowns, "Other" link type revealing custom label input
+
+### Coverage
+
+Coverage threshold: **80%** branches / functions / lines / statements, enforced by `npm run test:coverage`. The build fails in CI if any metric falls below this threshold.
+
+### CI
+
+Set `CI=true` to enable one Playwright retry on flaky tests and to prevent `.only` from being committed (`forbidOnly`).
+
+```bash
+CI=true npm run test:e2e
+```
+
+Recommended CI step order: `npm test` → `npm run test:coverage` → `npm run test:e2e`.
+
+Full QA test strategy and per-file test case documentation: [`docs/qa/STATUS.md`](docs/qa/STATUS.md).
 
 ---
 
@@ -133,10 +199,26 @@ resume-generate/
 │   ├── schema.ts                   # Zod validation schema (shared client + server)
 │   ├── sanitize.ts                 # Input sanitization utilities
 │   └── pdf-generator.ts            # PDFKit resume renderer
+├── __tests__/
+│   ├── lib/
+│   │   ├── schema.test.ts          # 121 unit tests — Zod schema validation
+│   │   ├── sanitize.test.ts        # 72 unit tests — input sanitization
+│   │   └── pdf-generator.test.ts   # 36 unit tests — PDF generation logic
+│   └── api/
+│       └── generate.test.ts        # 17 integration tests — API route
+├── e2e/
+│   ├── page-load.spec.ts           # 14 E2E tests — page render and section visibility
+│   ├── form-validation.spec.ts     # 12 E2E tests — validation errors and loading state
+│   ├── form-submission.spec.ts     # 10 E2E tests — PDF download flow
+│   └── dynamic-sections.spec.ts   # 20 E2E tests — add/remove dynamic fields
 ├── docs/
-│   └── architecture/
-│       ├── OVERVIEW.md             # System architecture and tech decisions
-│       └── PDF_STRATEGY.md         # PDF library selection and layout design
+│   ├── architecture/
+│   │   ├── OVERVIEW.md             # System architecture and tech decisions
+│   │   └── PDF_STRATEGY.md         # PDF library selection and layout design
+│   └── qa/
+│       └── STATUS.md               # QA test strategy, coverage, and status
+├── playwright.config.ts            # Playwright configuration (baseURL, webServer, CI)
+├── jest.config.js                  # Jest configuration (SWC transform, coverage thresholds)
 ├── Dockerfile                      # Multi-stage production build
 ├── next.config.ts                  # Standalone output + serverExternalPackages
 ├── tsconfig.json
@@ -422,6 +504,7 @@ Extended design documentation is available in the `docs/` directory:
 
 - `docs/architecture/OVERVIEW.md` — System architecture, tech decisions, validation strategy
 - `docs/architecture/PDF_STRATEGY.md` — PDF library selection, layout design, implementation patterns
+- `docs/qa/STATUS.md` — QA test strategy, per-file test case documentation, security coverage, CI notes
 
 ---
 

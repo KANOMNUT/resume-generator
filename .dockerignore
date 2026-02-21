@@ -7,3 +7,15 @@ PROMPT.md
 *.md
 .env*
 .claude
+
+# unit tests
+coverage
+jest.config.js
+__tests__
+
+# e2e tests
+e2e
+playwright.config.ts
+test-results
+playwright-report
+blob-report
