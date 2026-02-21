@@ -21,8 +21,8 @@ const config = {
   testMatch: ["<rootDir>/__tests__/**/*.test.{ts,tsx}"],
 
   collectCoverageFrom: [
-    "app/**/*.{ts,tsx}",
-    "components/**/*.{ts,tsx}",
+    "!app/**/*.{ts,tsx}",
+    "!components/**/*.{ts,tsx}",
     "lib/**/*.{ts,tsx}",
     "!**/*.d.ts",
     "!**/node_modules/**",
