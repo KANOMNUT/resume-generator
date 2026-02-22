@@ -106,7 +106,9 @@ describe("resumeSchema — valid data", () => {
           institution: "State University",
           degree: "B.Sc. Computer Science",
           fieldOfStudy: "Computer Science",
-          duration: "2014 - 2018",
+          startYear: "2014",
+          endYear: "2018",
+          isCurrent: false,
           description: "Graduated with honours.",
         },
       ],
@@ -591,7 +593,8 @@ describe("resumeSchema — education", () => {
   const validEdu = {
     institution: "MIT",
     degree: "B.Sc.",
-    duration: "2010 - 2014",
+    startYear: "2014",
+    isCurrent: true,
   };
 
   it("should fail when institution is an empty string", () => {
@@ -612,13 +615,37 @@ describe("resumeSchema — education", () => {
     expect(collectMessages(result)).toContain("Degree is required");
   });
 
-  it("should fail when duration is an empty string", () => {
+  it("should fail when startYear is an empty string", () => {
     const result = resumeSchema.safeParse({
       ...VALID_RESUME,
-      education: [{ ...validEdu, duration: "" }],
+      education: [{ ...validEdu, startYear: "" }],
     });
     expect(result.success).toBe(false);
-    expect(collectMessages(result)).toContain("Duration is required");
+    expect(collectMessages(result)).toContain("Start year is required");
+  });
+
+  it("should pass when isCurrent is true and endYear is absent", () => {
+    const result = resumeSchema.safeParse({
+      ...VALID_RESUME,
+      education: [{ ...validEdu, isCurrent: true }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should pass when isCurrent is false and endYear is provided", () => {
+    const result = resumeSchema.safeParse({
+      ...VALID_RESUME,
+      education: [{ ...validEdu, isCurrent: false, endYear: "2018" }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should pass when endYear is an empty string", () => {
+    const result = resumeSchema.safeParse({
+      ...VALID_RESUME,
+      education: [{ ...validEdu, isCurrent: false, endYear: "" }],
+    });
+    expect(result.success).toBe(true);
   });
 
   it("should pass when fieldOfStudy is omitted", () => {

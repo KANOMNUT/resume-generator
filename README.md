@@ -28,6 +28,7 @@ Resume Generator is a single-page application built with Next.js 16 (App Router)
 - Production-ready Docker image via three-stage build
 - Languages section for listing spoken languages with proficiency levels
 - Work experience dates use structured month/year dropdowns with a "Currently work here" checkbox that shows "Present" in the PDF
+- Education dates use structured year-only dropdowns (startYear, endYear) with a "Currently studying here" checkbox that shows "Present" in the PDF
 - Professional links use "Git Repo" as the label for git-type links; selecting "Other" reveals a custom label input
 
 ---
@@ -281,13 +282,17 @@ Each experience entry supports nested **Projects** (dynamic, max 10 per entry):
 
 ### Education (dynamic, max 10 entries)
 
-| Field                  | Required | Max Length  |
-|------------------------|----------|-------------|
-| Institution            | Yes      |             |
-| Degree                 | Yes      |             |
-| Field of Study         | No       |             |
-| Duration               | Yes      |             |
-| Description / Activities | No     | 1,000 chars |
+| Field                    | Required | Notes                                                                 |
+|--------------------------|----------|-----------------------------------------------------------------------|
+| Institution              | Yes      |                                                                       |
+| Degree                   | Yes      |                                                                       |
+| Field of Study           | No       |                                                                       |
+| Start Year               | Yes      | Dropdown: current year – 1960                                         |
+| End Year                 | No       | Dropdown: current year – 1960; disabled when "Currently studying here" is checked |
+| Currently Studying Here  | No       | Checkbox; when checked, End Year is disabled and PDF shows "Present"  |
+| Description / Activities | No       | Max 1,000 chars                                                       |
+
+PDF duration format: `"2020 – Present"` or `"2016 – 2020"`
 
 ### Languages (dynamic, max 20 entries)
 
@@ -361,7 +366,9 @@ Maximum request body size: 2 MB.
       "institution": "State University",
       "degree": "B.Sc.",
       "fieldOfStudy": "Computer Science",
-      "duration": "2016 – 2020",
+      "startYear": "2016",
+      "endYear": "2020",
+      "isCurrent": false,
       "description": "Dean's List, ACM Club"
     }
   ],

@@ -10,7 +10,9 @@
       "Bash(npx tsc:*)",
       "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx jest --no-coverage 2>&1)",
       "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx playwright install chromium 2>&1)",
-      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx playwright test --reporter=list 2>&1)"
+      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx playwright test --reporter=list 2>&1)",
+      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npm test -- --testPathPattern=\"schema|pdf-generator|sanitize\" --no-coverage 2>&1)",
+      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npm test -- --testPathPatterns=\"schema|pdf-generator|sanitize\" --no-coverage 2>&1)"
     ]
   }
 }

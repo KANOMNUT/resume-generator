@@ -22,6 +22,7 @@ export default function ResumeForm() {
     register,
     control,
     setValue,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<ResumeData>({
@@ -117,7 +118,7 @@ export default function ResumeForm() {
         </div>
 
         <div className="border-t border-gray-200 pt-6">
-          <EducationSection control={control} register={register} errors={errors} />
+          <EducationSection control={control} register={register} errors={errors} watch={watch} setValue={setValue} />
         </div>
 
         <div className="border-t border-gray-200 pt-6">

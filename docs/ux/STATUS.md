@@ -1045,4 +1045,29 @@ This UX design specification is complete and ready for development handoff.
 ```
 **Behavior:** Checking "Currently work here" clears end date fields and disables them; PDF renders "Present" for end date.
 
+#### Feature: Education Duration — Structured Year Dropdowns + Checkbox
+**Replaces:** Single duration text input
+
+**New layout per entry (date row):**
+```
+┌─────────────────────────────────────────────────────┐
+│  ┌────────────────────┐  ┌────────────────────┐    │
+│  │ Start Year *       │  │ End Year           │    │
+│  │ [Year dropdown]    │  │ [Year dropdown]    │    │
+│  │                    │  │  (disabled if ✓)   │    │
+│  └────────────────────┘  └────────────────────┘    │
+│                                                     │
+│  [✓] Currently studying here                       │
+└─────────────────────────────────────────────────────┘
+```
+
+**Fields:**
+- Start Year (required) — year dropdown, range 1960 to current year
+- End Year (optional) — year dropdown, range 1960 to current year; disabled when "Currently studying here" is checked
+- "Currently studying here" checkbox — when checked, clears and disables End Year; PDF renders "Present" for end year
+
+**Layout:** Start Year and End Year rendered in a 2-column grid row; "Currently studying here" checkbox appears below the grid row.
+
+**Behavior:** Checking "Currently studying here" clears the End Year field and disables the dropdown; unchecking re-enables it. PDF duration format: `"2020 – Present"` or `"2016 – 2020"`.
+
 ### Status: Completed

@@ -246,6 +246,51 @@ test.describe("Dynamic Section Interactions", () => {
     ).not.toBeAttached();
   });
 
+  test("education year dropdowns and isCurrent checkbox are visible after adding entry", async ({ page }) => {
+    await page.getByRole("button", { name: /add education/i }).click();
+    await page.waitForSelector('[id^="education"][id$="institution"]');
+
+    // Start year and end year selects must appear (name-based selectors).
+    await expect(
+      page.locator('select[name^="education."][name$=".startYear"]').nth(0)
+    ).toBeVisible();
+    await expect(
+      page.locator('select[name^="education."][name$=".endYear"]').nth(0)
+    ).toBeVisible();
+
+    // isCurrent checkbox must appear.
+    await expect(
+      page.locator('[id^="education"][id$="isCurrent"]').nth(0)
+    ).toBeVisible();
+  });
+
+  test("isCurrent checkbox disables end year select for education", async ({ page }) => {
+    await page.getByRole("button", { name: /add education/i }).click();
+    await page.waitForSelector('[id^="education"][id$="isCurrent"]');
+
+    await page.locator('[id^="education"][id$="isCurrent"]').nth(0).check();
+
+    await expect(
+      page.locator('select[name^="education."][name$=".endYear"]').nth(0)
+    ).toBeDisabled();
+  });
+
+  test("unchecking isCurrent re-enables end year select for education", async ({ page }) => {
+    await page.getByRole("button", { name: /add education/i }).click();
+    await page.waitForSelector('[id^="education"][id$="isCurrent"]');
+
+    const isCurrentCheckbox = page
+      .locator('[id^="education"][id$="isCurrent"]')
+      .nth(0);
+
+    await isCurrentCheckbox.check();
+    await isCurrentCheckbox.uncheck();
+
+    await expect(
+      page.locator('select[name^="education."][name$=".endYear"]').nth(0)
+    ).toBeEnabled();
+  });
+
   // ==========================================================================
   // Languages section
   // ==========================================================================

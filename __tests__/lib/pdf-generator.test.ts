@@ -175,7 +175,9 @@ const fullResume: ResumeData = {
       institution: "State University",
       degree: "B.Sc.",
       fieldOfStudy: "Computer Science",
-      duration: "2012 – 2016",
+      startYear: "2012",
+      endYear: "2016",
+      isCurrent: false,
       description: "Graduated with honours.",
     },
   ],
@@ -627,7 +629,9 @@ describe("generateResumePDF", () => {
           institution: "MIT",
           degree: "M.Sc.",
           fieldOfStudy: "Electrical Engineering",
-          duration: "2014 – 2016",
+          startYear: "2014",
+          endYear: "2016",
+          isCurrent: false,
         },
       ],
     };
@@ -652,7 +656,9 @@ describe("generateResumePDF", () => {
         {
           institution: "MIT",
           degree: "M.Sc.",
-          duration: "2014 – 2016",
+          startYear: "2014",
+          endYear: "2016",
+          isCurrent: false,
         },
       ],
     };
@@ -665,6 +671,55 @@ describe("generateResumePDF", () => {
       (args) => typeof args[0] === "string" && args[0] === "M.Sc."
     );
     expect(degreeCall).toBeDefined();
+  });
+
+  // ── Education with isCurrent: true ─────────────────────────────────────────
+
+  it("renders 'Present' as end label when education isCurrent is true", async () => {
+    const resume: ResumeData = {
+      ...baseResume,
+      education: [
+        {
+          institution: "City College",
+          degree: "M.Sc.",
+          startYear: "2022",
+          isCurrent: true,
+        },
+      ],
+    };
+
+    await generateResumePDF(resume);
+
+    const doc = getLastDocInstance();
+    const textCalls = doc.text.mock.calls as unknown[][];
+    const hasPresent = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("Present")
+    );
+    expect(hasPresent).toBe(true);
+  });
+
+  it("renders the end year in education duration text when isCurrent is false and endYear is provided", async () => {
+    const resume: ResumeData = {
+      ...baseResume,
+      education: [
+        {
+          institution: "City College",
+          degree: "M.Sc.",
+          startYear: "2018",
+          endYear: "2022",
+          isCurrent: false,
+        },
+      ],
+    };
+
+    await generateResumePDF(resume);
+
+    const doc = getLastDocInstance();
+    const textCalls = doc.text.mock.calls as unknown[][];
+    const hasEndYear = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("2022")
+    );
+    expect(hasEndYear).toBe(true);
   });
 
   // ── Nickname rendered in header ─────────────────────────────────────────────

@@ -4,6 +4,7 @@
 - Zod schema (lib/schema.ts): full validation for all resume fields
   - `links[].otherLabel` optional field for custom "Other" link labels
   - Experience `duration` replaced with `startMonth`, `startYear`, `endMonth`, `endYear`, `isCurrent`
+  - Education `duration` replaced with `startYear` (required), `endYear` (optional), `isCurrent` (boolean)
   - New `languages[]` array: `{ language: string; level: enum }`
 - Sanitization module (lib/sanitize.ts): strips control chars, trims strings, handles all new fields
 - PDF generator (lib/pdf-generator.ts): PDFKit-based, A4, Helvetica, full resume layout

@@ -284,11 +284,8 @@ test.describe("Form Submission and PDF Download", () => {
       .locator('[id^="education"][id$="degree"]')
       .nth(0)
       .fill("Bachelor of Science");
-    // duration is required by the schema
-    await page
-      .locator('[id^="education"][id$="duration"]')
-      .nth(0)
-      .fill("2016 - 2020");
+    await page.locator('select[name^="education."][name$=".startYear"]').nth(0).selectOption("2016");
+    await page.locator('[id^="education"][id$="isCurrent"]').nth(0).check();
 
     await fillMinimalRequired(page);
 

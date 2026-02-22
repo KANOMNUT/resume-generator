@@ -421,7 +421,8 @@ The codebase is ready for merge and production deployment with the understanding
 ### Consistency Verified
 - Schema, sanitize, component, and PDF generator are consistent for all new fields
 - `languages` array flows correctly from form → API → sanitize → PDF
-- `startMonth/startYear/endMonth/endYear/isCurrent` replace `duration` consistently across all layers
+- `startMonth/startYear/endMonth/endYear/isCurrent` replace experience `duration` consistently across all layers
+- `startYear/endYear/isCurrent` replace education `duration` consistently across all layers (year-only, no month dropdowns)
 - `otherLabel` handled in schema, sanitize, component, and PDF
 
 ### Form Sections Order (updated)

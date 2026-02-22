@@ -38,7 +38,9 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
       institution: cleanString(edu.institution),
       degree: cleanString(edu.degree),
       fieldOfStudy: edu.fieldOfStudy ? cleanString(edu.fieldOfStudy) : undefined,
-      duration: cleanString(edu.duration),
+      startYear: cleanString(edu.startYear),
+      endYear: edu.endYear ? cleanString(edu.endYear) : undefined,
+      isCurrent: edu.isCurrent,
       description: edu.description ? cleanString(edu.description) : undefined,
     })),
     languages: (data.languages ?? []).map((lang) => ({

@@ -366,8 +366,14 @@ function generateEducation(doc: PDFKit.PDFDocument, data: ResumeData): void {
         continued: false,
       });
 
+    // Build duration string from startYear / endYear / isCurrent
+    const endLabel = edu.isCurrent ? "Present" : edu.endYear || "";
+    const durationText = endLabel
+      ? `${edu.startYear} – ${endLabel}`
+      : edu.startYear;
+
     // Duration (right-aligned on same line)
-    doc.text(edu.duration, MARGINS.left, currentY, {
+    doc.text(durationText, MARGINS.left, currentY, {
       width: CONTENT_WIDTH,
       align: "right",
     });

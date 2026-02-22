@@ -50,7 +50,10 @@ Largest surface area at the base (fast, isolated, no I/O). Smallest at the top (
 - `links` array: max 10 entries; each link validates `type` enum (`git`, `portfolio`, `linkedin`, `other`); `url` is required; `otherLabel` required when type is `other`, ignored otherwise
 - `experience` array: max 20 entries; `company`, `position`, `startMonth`, `startYear`, `description` required; `endMonth` / `endYear` optional; `isCurrent` boolean; `description` max 1,000 chars
 - `experience.projects` nested array: max 10 per entry; `name` required; `details` optional, max 2,000 chars
-- `education` array: max 10 entries; `institution`, `degree`, `duration` required; `fieldOfStudy` optional; `description` optional max 1,000 chars
+- `education` array: max 10 entries; `institution`, `degree`, `startYear` required; `endYear` optional (disabled in UI when `isCurrent` is true); `isCurrent` boolean; `fieldOfStudy` optional; `description` optional max 1,000 chars
+  - startYear required — fails when startYear is empty
+  - isCurrent: true — endYear optional, disabled in UI
+  - isCurrent: false + endYear — valid combination
 - `languages` array: max 20 entries; `language` required; `level` enum (`native`, `fluent`, `advanced`, `intermediate`, `basic`) required
 - `skills` array: max 50 entries; each entry has required `value` string
 - `certificates` array: max 20 entries; `name` and `issuer` required; `year` optional free text
@@ -90,7 +93,7 @@ Largest surface area at the base (fast, isolated, no I/O). Smallest at the top (
 - Experience section: company, position, description rendered; projects rendered when present
 - Experience duration: `isCurrent: true` renders `"Present"` as end label
 - Experience duration: start and end month/year rendered in `"Mon YYYY – Mon YYYY"` format
-- Education section: institution, degree, field of study, duration rendered
+- Education section: institution, degree, field of study rendered; duration composed from startYear/endYear/isCurrent (e.g., "2016 – 2020" or "2020 – Present")
 - Languages section: language name and level rendered; bullet separator between entries
 - Skills section: skill values rendered as bullet-separated list
 - Certificates section: name, issuer, year rendered
@@ -178,6 +181,8 @@ Largest surface area at the base (fast, isolated, no I/O). Smallest at the top (
 - Clicking the remove button on a certificate entry deletes it
 - Checking "Currently work here" on an experience entry disables the End Month and End Year dropdowns
 - Unchecking "Currently work here" re-enables the End Month and End Year dropdowns
+- E2E: isCurrent checkbox on an education entry disables the End Year select
+- E2E: unchecking isCurrent on an education entry re-enables the End Year select
 - Selecting link type "Other" reveals the custom label text input
 - Selecting any link type other than "Other" hides the custom label input
 - Adding entries up to section limits does not produce UI errors

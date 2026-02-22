@@ -55,10 +55,9 @@ const educationSchema = z.object({
     .max(200, "Field of study too long")
     .optional()
     .or(z.literal("")),
-  duration: z
-    .string()
-    .min(1, "Duration is required")
-    .max(100, "Duration too long"),
+  startYear: z.string().min(1, "Start year is required").max(4, "Invalid year"),
+  endYear: z.string().max(4, "Invalid year").optional().or(z.literal("")),
+  isCurrent: z.boolean(),
   description: z
     .string()
     .max(1000, "Description too long")

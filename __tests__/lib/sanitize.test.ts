@@ -550,7 +550,9 @@ describe("sanitizeResumeData — education", () => {
     institution: "MIT",
     degree: "B.Sc.",
     fieldOfStudy: "Computer Science",
-    duration: "2010 - 2014",
+    startYear: "2010",
+    endYear: "2014",
+    isCurrent: false,
     description: "Graduated with honours.",
   };
 
@@ -570,12 +572,37 @@ describe("sanitizeResumeData — education", () => {
     expect(result.education[0].degree).toBe("B.Sc.");
   });
 
-  it("should sanitize duration", () => {
+  it("should sanitize startYear", () => {
     const result = sanitizeResumeData({
       ...baseResume,
-      education: [{ ...cleanEdu, duration: " 2010 - 2014 " }],
+      education: [{ ...cleanEdu, startYear: " \x012010\x7F " }],
     });
-    expect(result.education[0].duration).toBe("2010 - 2014");
+    expect(result.education[0].startYear).toBe("2010");
+  });
+
+  it("should sanitize endYear when present", () => {
+    const result = sanitizeResumeData({
+      ...baseResume,
+      education: [{ ...cleanEdu, endYear: " \x012014\x7F " }],
+    });
+    expect(result.education[0].endYear).toBe("2014");
+  });
+
+  it("should set endYear to undefined when absent", () => {
+    const { endYear: _ey, ...eduWithoutEndYear } = cleanEdu;
+    const result = sanitizeResumeData({
+      ...baseResume,
+      education: [{ ...eduWithoutEndYear }],
+    });
+    expect(result.education[0].endYear).toBeUndefined();
+  });
+
+  it("should preserve isCurrent boolean", () => {
+    const result = sanitizeResumeData({
+      ...baseResume,
+      education: [{ ...cleanEdu, isCurrent: true }],
+    });
+    expect(result.education[0].isCurrent).toBe(true);
   });
 
   it("should sanitize fieldOfStudy when present", () => {

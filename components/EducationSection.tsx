@@ -1,16 +1,35 @@
-import { Control, UseFormRegister, FieldErrors, useFieldArray } from "react-hook-form";
+"use client";
+
+import {
+  useFieldArray,
+  UseFormRegister,
+  Control,
+  FieldErrors,
+  UseFormWatch,
+  UseFormSetValue,
+} from "react-hook-form";
 import { ResumeData } from "@/lib/schema";
 
 interface EducationSectionProps {
-  control: Control<ResumeData>;
   register: UseFormRegister<ResumeData>;
+  control: Control<ResumeData>;
   errors: FieldErrors<ResumeData>;
+  watch: UseFormWatch<ResumeData>;
+  setValue: UseFormSetValue<ResumeData>;
 }
 
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from(
+  { length: currentYear - 1960 + 1 },
+  (_, i) => String(currentYear - i)
+);
+
 export default function EducationSection({
-  control,
   register,
+  control,
   errors,
+  watch,
+  setValue,
 }: EducationSectionProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -23,7 +42,9 @@ export default function EducationSection({
         institution: "",
         degree: "",
         fieldOfStudy: "",
-        duration: "",
+        startYear: "",
+        endYear: "",
+        isCurrent: false,
         description: "",
       });
     }
@@ -50,6 +71,7 @@ export default function EducationSection({
                 Remove
               </button>
             </div>
+
             <div className="space-y-3">
               <div>
                 <label
@@ -116,25 +138,71 @@ export default function EducationSection({
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor={`education.${index}.duration`}
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Duration <span className="text-red-500">*</span>
-                </label>
+              {/* Start Year / End Year */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Start Year */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Year <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    {...register(`education.${index}.startYear`)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Select year</option>
+                    {YEARS.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.education?.[index]?.startYear && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {errors.education[index]?.startYear?.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* End Year */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Year
+                  </label>
+                  <select
+                    {...register(`education.${index}.endYear`)}
+                    disabled={!!watch(`education.${index}.isCurrent`)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select year</option>
+                    {YEARS.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* isCurrent */}
+              <div className="flex items-center gap-2">
                 <input
-                  id={`education.${index}.duration`}
-                  type="text"
-                  {...register(`education.${index}.duration`)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
-                  placeholder="e.g., 2018 - 2022"
+                  type="checkbox"
+                  id={`education.${index}.isCurrent`}
+                  {...register(`education.${index}.isCurrent`)}
+                  onChange={(e) => {
+                    register(`education.${index}.isCurrent`).onChange(e);
+                    if (e.target.checked) {
+                      setValue(`education.${index}.endYear`, "");
+                    }
+                  }}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                {errors.education?.[index]?.duration && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {errors.education[index]?.duration?.message}
-                  </p>
-                )}
+                <label
+                  htmlFor={`education.${index}.isCurrent`}
+                  className="text-sm text-gray-700"
+                >
+                  Currently studying here
+                </label>
               </div>
 
               <div>
