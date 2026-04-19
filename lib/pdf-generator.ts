@@ -17,7 +17,7 @@ const PAGE_HEIGHT = 841.89; // A4 height in points
 const CONTENT_WIDTH = PAGE_WIDTH - MARGINS.left - MARGINS.right;
 
 // Photo dimensions (Classic/Compact: small circle-style, float right)
-const PHOTO_SIZE = 48; // 64px → ~48pt
+const PHOTO_SIZE = 72; // 96px → ~72pt
 const PHOTO_GAP = 10.5; // 14px marginLeft in preview → 10.5pt
 
 // ---------------------------------------------------------------------------
@@ -721,7 +721,7 @@ function generateModernLayout(
   let sy = MAIN_PAD_TOP; // sidebar y cursor (40px → 30pt)
 
   // Avatar / photo — 76px → 57pt diameter circle (fixed size, matches preview)
-  const avatarDiam = 57; // 76px × 0.75 = 57pt
+  const avatarDiam = 72; // 96px × 0.75 = 72pt
   const avatarRadius = avatarDiam / 2;
   const avatarCx = SIDEBAR_PAD + avatarRadius;
   const avatarCy = sy + avatarRadius;
