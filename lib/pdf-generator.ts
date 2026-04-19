@@ -184,20 +184,35 @@ function classicHeader(doc: PDFKit.PDFDocument, data: ResumeData): void {
     try {
       const base64Data = data.photo.split(",")[1];
       const imageBuffer = Buffer.from(base64Data, "base64");
+
       const photoX = PAGE_WIDTH - MARGINS.right - PHOTO_SIZE;
+
       const r = PHOTO_SIZE / 2;
       const cx = photoX + r;
       const cy = MARGINS.top + r;
-      const diam = r * 2;
+      const diameter = r * 2;
+
       doc.save();
+      // Clip circular avatar
       doc.circle(cx, cy, r).clip();
-      doc.image(imageBuffer, cx - r, cy - r, {
-        cover: [diam, diam],
-        align: "center",
-        valign: "center",
-      });
+
+      // Draw image using COVER (matches object-fit: cover)
+      doc.image(
+        imageBuffer,
+        cx - r,
+        cy - r,
+        {
+          cover: [diameter, diameter],
+          align: "center",
+          valign: "center",
+        }
+      );
+
       doc.restore();
-    } catch { /* skip on failure */ }
+
+    } catch {
+      // Skip or fallback if needed
+    }
   }
 
   const textWidth = data.photo
@@ -715,15 +730,24 @@ function generateModernLayout(
     try {
       const base64Data = data.photo.split(",")[1];
       const imageBuffer = Buffer.from(base64Data, "base64");
+      const diameter = avatarRadius * 2;
       doc.save();
+      // Clip circle
       doc.circle(avatarCx, avatarCy, avatarRadius).clip();
-      doc.image(imageBuffer, avatarCx - avatarRadius, avatarCy - avatarRadius, {
-        width: avatarRadius * 2,
-        height: avatarRadius * 2,
-      });
+
+      // Use COVER (this matches object-fit: cover)
+      doc.image(
+        imageBuffer,
+        avatarCx - avatarRadius,
+        avatarCy - avatarRadius,
+        {
+          cover: [diameter, diameter],
+          align: "center",
+          valign: "center",
+        }
+      );
       doc.restore();
     } catch {
-      // Fall back to initials on photo load failure
       modernDrawInitialsAvatar(doc, data, avatarCx, avatarCy, avatarRadius, accentColor);
     }
   } else {
