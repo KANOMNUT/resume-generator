@@ -94,6 +94,7 @@ export const resumeSchema = z.object({
     .min(1, "Last name is required")
     .max(100, "Last name too long"),
   nickname: z.string().max(50, "Nickname too long").optional().or(z.literal("")),
+  title: z.string().max(200, "Title too long").optional().or(z.literal("")),
   email: z
     .string()
     .min(1, "Email is required")
@@ -103,6 +104,7 @@ export const resumeSchema = z.object({
     .string()
     .min(1, "Phone number is required")
     .max(30, "Phone number too long"),
+  location: z.string().max(200, "Location too long").optional().or(z.literal("")),
   photo: z
     .string()
     .max(600000, "Photo file is too large (max ~450KB)")

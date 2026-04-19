@@ -37,16 +37,30 @@ const PDFDocument = jest.fn().mockImplementation(() => ({
   moveDown: jest.fn().mockReturnThis(),
   image: jest.fn().mockReturnThis(),
 
-  // Vector drawing — used for section divider lines
+  // Vector drawing — used for section divider lines and shapes
   moveTo: jest.fn().mockReturnThis(),
   lineTo: jest.fn().mockReturnThis(),
   stroke: jest.fn().mockReturnThis(),
+  fill: jest.fn().mockReturnThis(),
   lineWidth: jest.fn().mockReturnThis(),
+  circle: jest.fn().mockReturnThis(),
+  rect: jest.fn().mockReturnThis(),
+  roundedRect: jest.fn().mockReturnThis(),
+  fillOpacity: jest.fn().mockReturnThis(),
+
+  // Graphics state save/restore
+  save: jest.fn().mockReturnThis(),
+  restore: jest.fn().mockReturnThis(),
 
   // Page management
   addPage: jest.fn().mockReturnThis(),
 
-  // Mutable state property read by pdf-generator to track vertical position
+  // Text measurement — returns a stable non-zero value so layout calculations
+  // that use widthOfString do not produce NaN or divide-by-zero.
+  widthOfString: jest.fn().mockReturnValue(50),
+
+  // Mutable state properties read/written by pdf-generator to track position
+  x: 50,
   y: 100,
 }));
 

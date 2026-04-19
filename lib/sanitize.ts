@@ -10,8 +10,10 @@ export function sanitizeResumeData(data: ResumeData): ResumeData {
     firstName: cleanString(data.firstName),
     lastName: cleanString(data.lastName),
     nickname: data.nickname ? cleanString(data.nickname) : undefined,
+    title: data.title ? cleanString(data.title) : undefined,
     email: cleanString(data.email),
     phone: cleanString(data.phone),
+    location: data.location ? cleanString(data.location) : undefined,
     // Photo is a validated base64 data URL — pass through without modification
     photo: data.photo ?? undefined,
     links: (data.links ?? []).map((link) => ({

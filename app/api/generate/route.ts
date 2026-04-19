@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { resumeSchema } from "@/lib/schema";
 import { sanitizeResumeData } from "@/lib/sanitize";
 import { generateResumePDF } from "@/lib/pdf-generator";
+import type { TemplateId } from "@/types/resume";
+
+const VALID_TEMPLATES: TemplateId[] = ["classic", "modern", "compact"];
 
 // Maximum allowed request body size (2MB — accommodates base64-encoded photo)
 const MAX_BODY_SIZE = 2097152;
@@ -50,6 +53,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Extract and validate the template field before schema validation
+    // (resumeSchema does not include template — it is a UI concern only)
+    const rawBody = body !== null && typeof body === "object"
+      ? (body as Record<string, unknown>)
+      : {} as Record<string, unknown>;
+
+    const rawTemplate = rawBody.template;
+    const template: TemplateId =
+      typeof rawTemplate === "string" &&
+      VALID_TEMPLATES.includes(rawTemplate as TemplateId)
+        ? (rawTemplate as TemplateId)
+        : "classic";
+
+    // Extract and validate accentColor — must be a valid 6-digit hex color
+    const rawAccent = rawBody.accentColor;
+    const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+    const accentColor: string =
+      typeof rawAccent === "string" && HEX_COLOR_RE.test(rawAccent)
+        ? rawAccent
+        : "#3a3dd6";
+
     // Validate against schema
     const validationResult = resumeSchema.safeParse(body);
 
@@ -74,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Generate PDF
     let pdfBuffer: Buffer;
     try {
-      pdfBuffer = await generateResumePDF(sanitizedData);
+      pdfBuffer = await generateResumePDF(sanitizedData, template, accentColor);
     } catch (error) {
       // Log the actual error for debugging (in production, this would go to a logging service)
       console.error("PDF generation failed:", error);

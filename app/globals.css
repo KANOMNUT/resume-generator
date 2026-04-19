@@ -1,1 +1,92 @@
 @import "tailwindcss";
+
+:root {
+  --bg: #f6f6f4;
+  --panel: #ffffff;
+  --ink: #111214;
+  --ink-2: #2a2c31;
+  --ink-3: #55585f;
+  --ink-4: #878a92;
+  --line: #e6e6e3;
+  --line-2: #ececea;
+  --chip: #f2f2ef;
+  --accent: #3a3dd6;
+  --accent-soft: #eceafb;
+  --danger: #b4232c;
+  --ok: #2f7d3a;
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow-1: 0 1px 0 rgba(17,18,20,0.03), 0 1px 2px rgba(17,18,20,0.04);
+  --shadow-2: 0 1px 0 rgba(17,18,20,0.04), 0 10px 30px -12px rgba(17,18,20,0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/*
+  Tailwind v4 preflight sets background-color: transparent on inputs.
+  Override definitively so inputs are always white with a visible border.
+  Inline styles in components serve as runtime overrides on top of this.
+*/
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background-color: #ffffff;
+  border: 1px solid #e6e6e3;
+  border-radius: 7px;
+}
+
+/*
+  Focus ring — belt-and-suspenders alongside the JS onFocus handlers.
+*/
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3a3dd6;
+  box-shadow: 0 0 0 3px rgba(58, 61, 214, 0.18);
+}
+
+/* Scrollbar polish */
+.pane::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.pane::-webkit-scrollbar-thumb {
+  background: #d4d4d0;
+  border-radius: 10px;
+  border: 2px solid var(--bg);
+}
+.pane::-webkit-scrollbar-thumb:hover {
+  background: #bcbcb8;
+}
+.pane.right::-webkit-scrollbar-thumb {
+  border-color: #ecece9;
+}

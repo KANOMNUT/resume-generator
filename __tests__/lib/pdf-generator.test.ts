@@ -102,12 +102,23 @@ function configureMockToResolve(): void {
       moveTo: jest.fn().mockReturnThis(),
       lineTo: jest.fn().mockReturnThis(),
       stroke: jest.fn().mockReturnThis(),
+      fill: jest.fn().mockReturnThis(),
       lineWidth: jest.fn().mockReturnThis(),
       image: jest.fn().mockReturnThis(),
       addPage: jest.fn().mockReturnThis(),
-      // doc.y is read as a plain property inside checkPageBreak and generateHeader.
+      circle: jest.fn().mockReturnThis(),
+      rect: jest.fn().mockReturnThis(),
+      roundedRect: jest.fn().mockReturnThis(),
+      fillOpacity: jest.fn().mockReturnThis(),
+      save: jest.fn().mockReturnThis(),
+      restore: jest.fn().mockReturnThis(),
+      // widthOfString returns a stable non-zero value so inline layout arithmetic
+      // (cx += doc.widthOfString(...)) does not produce NaN or divide-by-zero.
+      widthOfString: jest.fn().mockReturnValue(50),
+      // doc.y / doc.x are read/written as plain properties inside layout helpers.
       // A value of 100 keeps the mock document well within the page bounds so
       // checkPageBreak never triggers an addPage call during normal tests.
+      x: 50,
       y: 100,
     };
   });
@@ -472,16 +483,22 @@ describe("generateResumePDF", () => {
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
 
-    // The languages section joins all entries into a single string, so we look
-    // for a call that contains all three language names simultaneously.
-    const combinedLanguageCall = textCalls.some(
-      (args) =>
-        typeof args[0] === "string" &&
-        args[0].includes("English") &&
-        args[0].includes("French") &&
-        args[0].includes("Mandarin")
+    // In the redesigned Classic layout each language token is rendered with its
+    // own text() call (to allow mixed colors for name vs level). We verify each
+    // language name appears in at least one call rather than requiring all three
+    // to appear in a single call.
+    const hasEnglish = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("English")
     );
-    expect(combinedLanguageCall).toBe(true);
+    const hasFrench = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("French")
+    );
+    const hasMandarin = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("Mandarin")
+    );
+    expect(hasEnglish).toBe(true);
+    expect(hasFrench).toBe(true);
+    expect(hasMandarin).toBe(true);
   });
 
   // ── 13a. Certificate with year ─────────────────────────────────────────────
@@ -497,7 +514,7 @@ describe("generateResumePDF", () => {
     await expect(generateResumePDF(resume)).resolves.toBeDefined();
   });
 
-  it("includes the year in parentheses in the rendered text when a certificate year is provided", async () => {
+  it("includes the year in the rendered text when a certificate year is provided", async () => {
     const resume: ResumeData = {
       ...baseResume,
       certificates: [
@@ -509,13 +526,20 @@ describe("generateResumePDF", () => {
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
-    const hasCertWithYear = textCalls.some(
+
+    // In the redesigned Classic layout the cert name and year are rendered in
+    // separate text() calls (name left-aligned, year right-aligned). We verify
+    // each is present individually rather than in the same call.
+    const hasCertName = textCalls.some(
       (args) =>
         typeof args[0] === "string" &&
-        args[0].includes("AWS Certified Developer") &&
-        args[0].includes("(2023)")
+        args[0].includes("AWS Certified Developer")
     );
-    expect(hasCertWithYear).toBe(true);
+    const hasYear = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0].includes("2023")
+    );
+    expect(hasCertName).toBe(true);
+    expect(hasYear).toBe(true);
   });
 
   // ── 13b. Certificate without year ─────────────────────────────────────────
@@ -734,14 +758,22 @@ describe("generateResumePDF", () => {
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
-    const nameCall = textCalls.find(
+
+    // In the redesigned Classic layout the name and nickname are rendered as
+    // two separate text() calls so they can have different fonts and colors.
+    // We verify each part is present in its own call.
+    const hasName = textCalls.some(
       (args) =>
         typeof args[0] === "string" &&
         args[0].includes("Jane") &&
-        args[0].includes("Doe") &&
-        args[0].includes("(JD)")
+        args[0].includes("Doe")
     );
-    expect(nameCall).toBeDefined();
+    const hasNickname = textCalls.some(
+      (args) =>
+        typeof args[0] === "string" && args[0].includes("(JD)")
+    );
+    expect(hasName).toBe(true);
+    expect(hasNickname).toBe(true);
   });
 
   it("renders first and last name without parentheses when nickname is absent", async () => {
@@ -762,12 +794,14 @@ describe("generateResumePDF", () => {
 
 describe("getLinkLabel (via generateResumePDF integration)", () => {
   /**
-   * All tests here call generateResumePDF with a single link of a specific
-   * type and then inspect doc.text.mock.calls to find the call that contains
-   * the formatted link string — which has the form "<Label>: <url>".
+   * getLinkLabel is not exported so it is tested indirectly via the Modern
+   * template sidebar, which renders a label line above each link URL.
+   * The label is uppercased by the sidebar renderer, so we look for the
+   * uppercase form in doc.text.mock.calls.
    *
-   * Because getLinkLabel is not exported we cannot unit-test it directly;
-   * integration through the public API is the only option.
+   * Classic template renders links as bare URLs in the contact row (no label).
+   * Compact template renders links as bare URLs (no label either).
+   * Modern template renders: label (uppercase) then url on the next line.
    */
 
   beforeEach(() => {
@@ -777,57 +811,58 @@ describe("getLinkLabel (via generateResumePDF integration)", () => {
 
   // ── 14. git → "Git Repo" ────────────────────────────────────────────────────
 
-  it('uses "Git Repo:" as the label for a link with type "git"', async () => {
+  it('uses "Git Repo" as the label for a link with type "git"', async () => {
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "git", url: "https://github.com/x" }],
     };
 
-    await generateResumePDF(resume);
+    // Modern template is where getLinkLabel output appears in rendered text
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Git Repo:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("GIT REPO")
     );
     expect(hasLabel).toBe(true);
   });
 
   // ── 15. linkedin → "LinkedIn" ───────────────────────────────────────────────
 
-  it('uses "LinkedIn:" as the label for a link with type "linkedin"', async () => {
+  it('uses "LinkedIn" as the label for a link with type "linkedin"', async () => {
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "linkedin", url: "https://linkedin.com/in/x" }],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("LinkedIn:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("LINKEDIN")
     );
     expect(hasLabel).toBe(true);
   });
 
   // ── 16. portfolio → "Portfolio" ─────────────────────────────────────────────
 
-  it('uses "Portfolio:" as the label for a link with type "portfolio"', async () => {
+  it('uses "Portfolio" as the label for a link with type "portfolio"', async () => {
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "portfolio", url: "https://myportfolio.dev" }],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Portfolio:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("PORTFOLIO")
     );
     expect(hasLabel).toBe(true);
   });
@@ -846,14 +881,14 @@ describe("getLinkLabel (via generateResumePDF integration)", () => {
       ],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
-    // "blog" should be capitalised to "Blog" by capitalizeFirst
+    // "blog" → capitaliseFirst → "Blog" → uppercase → "BLOG"
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Blog:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("BLOG")
     );
     expect(hasLabel).toBe(true);
   });
@@ -870,68 +905,68 @@ describe("getLinkLabel (via generateResumePDF integration)", () => {
       ],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
-    // The raw lowercase form "blog:" must not appear
-    const hasRawLabel = textCalls.some(
-      (args) =>
-        typeof args[0] === "string" && args[0].includes("blog:")
+    // The raw lowercase form "blog" (exactly, as a standalone label) must not
+    // appear — the label must go through capitalizeFirst before rendering.
+    const hasRawLowercase = textCalls.some(
+      (args) => typeof args[0] === "string" && args[0] === "blog"
     );
-    expect(hasRawLabel).toBe(false);
+    expect(hasRawLowercase).toBe(false);
   });
 
   // ── 18. other + no otherLabel → "Other" ────────────────────────────────────
 
-  it('falls back to "Other:" when type is "other" and otherLabel is absent', async () => {
+  it('falls back to "Other" when type is "other" and otherLabel is absent', async () => {
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "other", url: "https://blog.example.com" }],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Other:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("OTHER")
     );
     expect(hasLabel).toBe(true);
   });
 
-  it('falls back to "Other:" when type is "other" and otherLabel is an empty string', async () => {
+  it('falls back to "Other" when type is "other" and otherLabel is an empty string', async () => {
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "other", url: "https://blog.example.com", otherLabel: "" }],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Other:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("OTHER")
     );
     expect(hasLabel).toBe(true);
   });
 
-  it('falls back to "Other:" when type is "other" and otherLabel is a whitespace-only string', async () => {
+  it('falls back to "Other" when type is "other" and otherLabel is a whitespace-only string', async () => {
     // Exercises the `otherLabel.trim()` guard inside getLinkLabel.
     const resume: ResumeData = {
       ...baseResume,
       links: [{ type: "other", url: "https://blog.example.com", otherLabel: "   " }],
     };
 
-    await generateResumePDF(resume);
+    await generateResumePDF(resume, "modern");
 
     const doc = getLastDocInstance();
     const textCalls = doc.text.mock.calls as unknown[][];
     const hasLabel = textCalls.some(
       (args) =>
-        typeof args[0] === "string" && args[0].includes("Other:")
+        typeof args[0] === "string" && args[0].toUpperCase().includes("OTHER")
     );
     expect(hasLabel).toBe(true);
   });

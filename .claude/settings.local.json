@@ -12,7 +12,23 @@
       "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx playwright install chromium 2>&1)",
       "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npx playwright test --reporter=list 2>&1)",
       "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npm test -- --testPathPattern=\"schema|pdf-generator|sanitize\" --no-coverage 2>&1)",
-      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npm test -- --testPathPatterns=\"schema|pdf-generator|sanitize\" --no-coverage 2>&1)"
+      "Bash(cd /c/Users/Game0/Documents/Programming/NodeJS/resume-generate && npm test -- --testPathPatterns=\"schema|pdf-generator|sanitize\" --no-coverage 2>&1)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cp \"/c/Users/Game0/.claude/projects/C--Users-Game0-Documents-Programming-NodeJS-resume-generate/90cecb60-7cc6-46f0-90ea-0459f6aadb23/tool-results/webfetch-1776551798295-uv3rqa.bin\" /tmp/design.bin)",
+      "Read(//tmp/**)",
+      "Read(//c/tmp/**)",
+      "Bash(tar -xzf design.tar.gz)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('compilerOptions',{}\\).get\\('paths',{}\\), indent=2\\)\\)\")",
+      "Bash(node *)",
+      "Bash(cp \"C:/Users/Game0/.claude/projects/C--Users-Game0-Documents-Programming-NodeJS-resume-generate/90cecb60-7cc6-46f0-90ea-0459f6aadb23/tool-results/webfetch-1776551798295-uv3rqa.bin\" /tmp/design_raw.gz)",
+      "Bash(gunzip -c /tmp/design_raw.gz)",
+      "Bash(npm test *)",
+      "Bash(npx jest *)",
+      "Bash(sed -n '155,165p' /c/Users/Game0/Documents/Programming/NodeJS/resume-generate/node_modules/pdfkit/js/pdfkit.js)",
+      "Bash(sed -n '222,232p' /c/Users/Game0/Documents/Programming/NodeJS/resume-generate/node_modules/pdfkit/js/pdfkit.js)",
+      "Bash(grep -v \"//\")",
+      "Bash(git stash *)",
+      "Bash(echo \"Exit code: $?\")"
     ]
   }
 }
