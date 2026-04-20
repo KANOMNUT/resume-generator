@@ -876,44 +876,56 @@ function generateModernLayout(
   // Skills — pill-style chips; preview: fontSize 10px (7.5pt), bg #2b2d33, color #d6d9de
   if (data.skills && data.skills.length > 0) {
     sy = modernSideHeader(doc, "SKILLS", sy);
+
     // Render skills as wrapped pills
     const pillPadH = 5.25; // 7px → 5.25pt
     const pillPadV = 1.5;  // 2px → 1.5pt
     const pillFontSize = 7.5; // 10px → 7.5pt
     const pillGap = 3;
+
     let px = SIDEBAR_PAD;
     let rowY = sy;
+
     const maxX = SIDEBAR_WIDTH - SIDEBAR_PAD;
 
     doc.font("Helvetica").fontSize(pillFontSize).fillColor(SIDEBAR_ITEM);
 
     data.skills.forEach((skill) => {
       const skillText = skill.value;
+
+      // Measure text width
       const textW = doc.widthOfString(skillText);
+
+      // Calculate pill size
       const pillW = textW + pillPadH * 2;
       const pillH = pillFontSize + pillPadV * 2;
 
-      // Wrap to next row if pill overflows
+      // Wrap to next row
       if (px + pillW > maxX && px > SIDEBAR_PAD) {
         px = SIDEBAR_PAD;
         rowY += pillH + pillGap;
       }
 
-      // Pill background — rounded rect, #2b2d33
+      // Draw pill background
+      const rr = pillH / 2;
+
       doc.save();
-      const rr = pillH / 2; // border-radius: 999px
-      doc
-        .roundedRect(px, rowY, pillW, pillH, rr)
-        .fill("#2b2d33");
+
+      doc.roundedRect(px, rowY, pillW, pillH, rr).fill("#2b2d33");
+
       doc.restore();
 
-      // Skill text
-      doc
-        .font("Helvetica")
-        .fontSize(pillFontSize)
-        .fillColor(SIDEBAR_ITEM)
-        .text(skillText, px + pillPadH, rowY + pillPadV, { lineBreak: false });
+      // Horizontal center
+      const textX =
+        px + (pillW - textW) / 2;
 
+      // Vertical center
+      const textY =
+        rowY + (pillH - pillFontSize) / 2 + 0.6;
+
+      doc.font("Helvetica").fontSize(pillFontSize).fillColor(SIDEBAR_ITEM).text(skillText, textX, textY, { lineBreak: false });
+
+      // Move cursor
       px += pillW + pillGap;
       sy = rowY + pillH;
     });
