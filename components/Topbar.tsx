@@ -3,24 +3,19 @@
 import Icon from "@/components/ui/Icon";
 
 interface TopbarProps {
-  firstName: string;
-  lastName: string;
   onStartEmpty: () => void;
   onGeneratePDF: () => void;
   isGenerating: boolean;
 }
 
 export default function Topbar({
-  firstName,
-  lastName,
   onStartEmpty,
   onGeneratePDF,
   isGenerating,
 }: TopbarProps) {
-  const name = [firstName, lastName].filter(Boolean).join(" ") || "New Resume";
-
   return (
     <div
+      className="topbar"
       style={{
         position: "sticky",
         top: 0,
@@ -80,39 +75,13 @@ export default function Topbar({
         Resume Studio
       </div>
 
-      {/* Breadcrumbs */}
-      <div style={{ color: "var(--ink-4)", fontSize: "13px" }}>
-        <b style={{ color: "var(--ink-2)", fontWeight: 500 }}>{name}</b>
-        {" / Untitled resume"}
-      </div>
-
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* Save status */}
-      <div
-        style={{
-          color: "var(--ink-4)",
-          fontSize: "12px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-        }}
-      >
-        <span
-          style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: "var(--ok)",
-            display: "inline-block",
-          }}
-        />
-        Saved &middot; just now
-      </div>
-
       {/* Start empty */}
       <button
+        type="button"
+        className="topbar-btn"
         onClick={onStartEmpty}
         style={{
           display: "inline-flex",
@@ -132,8 +101,10 @@ export default function Topbar({
         Start empty
       </button>
 
-      {/* Generate PDF */}
+      {/* Generate PDF (mobile uses the bottom bar instead) */}
       <button
+        type="button"
+        className="desktop-only"
         onClick={onGeneratePDF}
         disabled={isGenerating}
         style={{

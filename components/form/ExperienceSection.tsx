@@ -167,7 +167,7 @@ function ExperienceEntry({
       onRemove={onRemove}
       onDuplicate={onDuplicate}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
         <Field
           label="Company"
           required
@@ -190,7 +190,7 @@ function ExperienceEntry({
         </Field>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
         <Field label="Start">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
             <StyledSelect {...register(`experience.${idx}.startMonth`)}>

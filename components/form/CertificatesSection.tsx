@@ -33,6 +33,7 @@ export default function CertificatesSection({
           onRemove={() => remove(i)}
         >
           <div
+            className="grid-2"
             style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}
           >
             <Field

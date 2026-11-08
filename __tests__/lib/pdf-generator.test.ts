@@ -115,6 +115,12 @@ function configureMockToResolve(): void {
       // widthOfString returns a stable non-zero value so inline layout arithmetic
       // (cx += doc.widthOfString(...)) does not produce NaN or divide-by-zero.
       widthOfString: jest.fn().mockReturnValue(50),
+      // Used by the Executive and Timeline layouts.
+      heightOfString: jest.fn().mockReturnValue(12),
+      clip: jest.fn().mockReturnThis(),
+      strokeOpacity: jest.fn().mockReturnThis(),
+      fillAndStroke: jest.fn().mockReturnThis(),
+      page: {},
       // doc.y / doc.x are read/written as plain properties inside layout helpers.
       // A value of 100 keeps the mock document well within the page bounds so
       // checkPageBreak never triggers an addPage call during normal tests.
@@ -969,5 +975,40 @@ describe("getLinkLabel (via generateResumePDF integration)", () => {
         typeof args[0] === "string" && args[0].toUpperCase().includes("OTHER")
     );
     expect(hasLabel).toBe(true);
+  });
+});
+
+describe.each(["executive", "timeline"] as const)("%s template", (template) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    configureMockToResolve();
+  });
+
+  const renderedText = () =>
+    getLastDocInstance().text.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+
+  it("renders every populated section", async () => {
+    await expect(generateResumePDF(fullResume, template, "#1f6b3a")).resolves.toBeDefined();
+
+    const text = renderedText();
+    for (const expected of [
+      "John Smith",
+      " (JS)",
+      "Senior Engineer",
+      "Acme Corp",
+      "January 2020 \u2014 March 2023",
+      "B.Sc., Computer Science",
+      "2012 \u2013 2016",
+      "English",
+      "AWS Solutions Architect",
+      "API Redesign",
+    ]) {
+      expect(text).toContain(expected);
+    }
+    expect(getLastDocInstance().image).toHaveBeenCalled();
+  });
+
+  it("resolves with only the required fields", async () => {
+    await expect(generateResumePDF(baseResume, template)).resolves.toBeDefined();
   });
 });

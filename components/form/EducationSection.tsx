@@ -45,7 +45,7 @@ function EducationEntry({
       onRemove={onRemove}
       onDuplicate={onDuplicate}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
         <Field
           label="Institution"
           required

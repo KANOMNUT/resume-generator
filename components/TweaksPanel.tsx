@@ -1,6 +1,6 @@
 "use client";
 
-import { ACCENTS, TemplateId } from "@/types/resume";
+import { ACCENTS, TemplateId, TEMPLATES } from "@/types/resume";
 import Icon from "@/components/ui/Icon";
 
 interface TweaksPanelProps {
@@ -13,12 +13,6 @@ interface TweaksPanelProps {
   onClearAll: () => void;
 }
 
-const TEMPLATES: [TemplateId, string][] = [
-  ["classic", "Classic"],
-  ["modern", "Modern"],
-  ["compact", "Compact"],
-];
-
 export default function TweaksPanel({
   template,
   onTemplateChange,
@@ -29,20 +23,7 @@ export default function TweaksPanel({
   onClearAll,
 }: TweaksPanelProps) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "22px",
-        right: "22px",
-        width: "280px",
-        background: "var(--panel)",
-        border: "1px solid var(--line)",
-        borderRadius: "12px",
-        boxShadow: "var(--shadow-2)",
-        padding: "14px 14px 12px",
-        zIndex: 50,
-      }}
-    >
+    <div className="tweaks">
       <h3
         style={{
           fontSize: "12px",
@@ -57,12 +38,15 @@ export default function TweaksPanel({
         <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
           <Icon name="settings" size={13} /> Tweaks
         </span>
-        <span
+        <button
+          type="button"
+          className="tweaks-close"
           onClick={onClose}
-          style={{ cursor: "pointer", color: "var(--ink-4)" }}
+          aria-label="Close tweaks"
+          style={{ cursor: "pointer", color: "var(--ink-4)", border: "none", background: "none", padding: 0, display: "grid" }}
         >
           <Icon name="x" size={14} />
-        </span>
+        </button>
       </h3>
 
       {/* Template picker */}
@@ -78,6 +62,7 @@ export default function TweaksPanel({
           Template
         </label>
         <div
+          className="tweaks-templates"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
@@ -85,9 +70,11 @@ export default function TweaksPanel({
           }}
         >
           {TEMPLATES.map(([id, name]) => (
-            <div
+            <button
+              type="button"
               key={id}
               onClick={() => onTemplateChange(id)}
+              aria-pressed={template === id}
               style={{
                 cursor: "pointer",
                 border: `1px solid ${template === id ? "var(--ink)" : "var(--line)"}`,
@@ -102,7 +89,7 @@ export default function TweaksPanel({
             >
               <ThumbArt variant={id} />
               {name}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -121,13 +108,16 @@ export default function TweaksPanel({
         </label>
         <div style={{ display: "flex", gap: "6px" }}>
           {ACCENTS.map((a) => (
-            <div
+            <button
+              type="button"
               key={a.value}
+              className="accent-dot"
               onClick={() => onAccentChange(a.value)}
               title={a.name}
+              aria-label={`${a.name} accent`}
+              aria-pressed={accent === a.value}
               style={{
-                width: "22px",
-                height: "22px",
+                padding: 0,
                 borderRadius: "50%",
                 cursor: "pointer",
                 border: `2px solid ${accent === a.value ? "var(--ink)" : "transparent"}`,
@@ -255,6 +245,79 @@ function ThumbArt({ variant }: { variant: TemplateId }) {
               height: "1.5px",
               background: "#ccc",
               boxShadow: "0 4px 0 #ccc, 0 8px 0 #ccc, 0 12px 0 #ccc, 0 18px 0 #ccc, 0 22px 0 #ccc",
+            }}
+          />
+        </>
+      )}
+      {variant === "executive" && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "13px",
+              background: "var(--accent)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "19px",
+              left: "6px",
+              right: "6px",
+              height: "1.5px",
+              background: "#ccc",
+              boxShadow: "0 4px 0 #ccc, 0 8px 0 #ccc, 0 14px 0 #ccc, 0 18px 0 #ccc",
+            }}
+          />
+        </>
+      )}
+      {variant === "timeline" && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              top: "6px",
+              left: "6px",
+              width: "26px",
+              height: "3px",
+              background: "#111214",
+              borderRadius: "1px",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "14px",
+              bottom: "6px",
+              left: "8px",
+              width: "1px",
+              background: "#ccc",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "14px",
+              left: "6px",
+              width: "5px",
+              height: "5px",
+              borderRadius: "50%",
+              background: "var(--accent)",
+              boxShadow: "0 13px 0 var(--accent)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "16px",
+              left: "15px",
+              right: "6px",
+              height: "1.5px",
+              background: "#ccc",
+              boxShadow: "0 4px 0 #ccc, 0 13px 0 #ccc, 0 17px 0 #ccc",
             }}
           />
         </>

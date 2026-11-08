@@ -35,6 +35,7 @@ export default function PersonalSection({
   return (
     <div>
       <div
+        className="grid-2"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
