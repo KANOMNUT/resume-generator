@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { resumeSchema } from "@/lib/schema";
 import { sanitizeResumeData } from "@/lib/sanitize";
 import { generateResumePDF } from "@/lib/pdf-generator";
-import type { TemplateId } from "@/types/resume";
+import { TEMPLATES, type TemplateId } from "@/types/resume";
 
-const VALID_TEMPLATES: TemplateId[] = ["classic", "modern", "compact"];
+const VALID_TEMPLATES = TEMPLATES.map(([id]) => id);
 
 // Maximum allowed request body size (2MB — accommodates base64-encoded photo)
 const MAX_BODY_SIZE = 2097152;

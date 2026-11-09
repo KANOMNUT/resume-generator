@@ -11,7 +11,20 @@ export type LanguageLevel =
   | "advanced"
   | "intermediate"
   | "basic";
-export type TemplateId = "classic" | "modern" | "compact";
+export type TemplateId =
+  | "classic"
+  | "modern"
+  | "compact"
+  | "executive"
+  | "timeline";
+
+export const TEMPLATES: [TemplateId, string][] = [
+  ["classic", "Classic"],
+  ["modern", "Modern"],
+  ["compact", "Compact"],
+  ["executive", "Executive"],
+  ["timeline", "Timeline"],
+];
 
 export interface PreviewLink {
   type: LinkType;

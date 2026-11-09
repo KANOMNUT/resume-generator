@@ -1,9 +1,12 @@
 "use client";
 
-import { PreviewData, TemplateId } from "@/types/resume";
+import { useEffect, useRef } from "react";
+import { PreviewData, TemplateId, TEMPLATES } from "@/types/resume";
 import ClassicTemplate from "@/components/preview/ClassicTemplate";
 import ModernTemplate from "@/components/preview/ModernTemplate";
 import CompactTemplate from "@/components/preview/CompactTemplate";
+import ExecutiveTemplate from "@/components/preview/ExecutiveTemplate";
+import TimelineTemplate from "@/components/preview/TimelineTemplate";
 import Icon from "@/components/ui/Icon";
 
 interface ResumePreviewProps {
@@ -12,13 +15,20 @@ interface ResumePreviewProps {
   onTemplateChange: (t: TemplateId) => void;
   zoom: number;
   onZoomChange: (z: number) => void;
+  /** Rendered between the controls and the page (the Tweaks panel). */
+  children?: React.ReactNode;
 }
 
-const TEMPLATES: [TemplateId, string][] = [
-  ["classic", "Classic"],
-  ["modern", "Modern"],
-  ["compact", "Compact"],
-];
+const COMPONENTS = {
+  classic: ClassicTemplate,
+  modern: ModernTemplate,
+  compact: CompactTemplate,
+  executive: ExecutiveTemplate,
+  timeline: TimelineTemplate,
+};
+
+// Templates whose design runs edge to edge (no page padding).
+const FULL_BLEED: TemplateId[] = ["modern", "executive"];
 
 export default function ResumePreview({
   data,
@@ -26,29 +36,25 @@ export default function ResumePreview({
   onTemplateChange,
   zoom,
   onZoomChange,
+  children,
 }: ResumePreviewProps) {
-  const TemplateComponent =
-    template === "classic"
-      ? ClassicTemplate
-      : template === "modern"
-      ? ModernTemplate
-      : CompactTemplate;
+  const TemplateComponent = COMPONENTS[template];
+  const bleed = FULL_BLEED.includes(template);
+  const paneRef = useRef<HTMLDivElement>(null);
+
+  // Shrink the page to fit the available width on first load.
+  // A hidden pane (mobile edit view) measures 0, so fall back to the window.
+  useEffect(() => {
+    const w = paneRef.current?.clientWidth;
+    const fit = Math.floor(((w ? w - 56 : window.innerWidth - 32) / 640) * 100) / 100;
+    if (fit < zoom) onZoomChange(Math.max(0.4, fit));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const PAGE_H = 864;
 
   return (
-    <div
-      className="pane right"
-      style={{
-        background: "#ecece9",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "28px 28px 80px",
-        overflowY: "auto",
-        minWidth: 0,
-      }}
-    >
+    <div ref={paneRef} className="pane right preview-pane">
       {/* Controls */}
       <div
         style={{
@@ -56,12 +62,14 @@ export default function ResumePreview({
           maxWidth: "640px",
           display: "flex",
           alignItems: "center",
+          flexWrap: "wrap",
           gap: "8px",
-          marginBottom: "16px",
+          margin: "0 auto 16px",
         }}
       >
-        {/* Template pill switcher */}
+        {/* Template pill switcher (Tweaks panel covers this on mobile) */}
         <div
+          className="template-pills"
           style={{
             display: "inline-flex",
             background: "var(--panel)",
@@ -72,10 +80,13 @@ export default function ResumePreview({
           }}
         >
           {TEMPLATES.map(([id, label]) => (
-            <div
+            <button
+              type="button"
               key={id}
               onClick={() => onTemplateChange(id)}
+              aria-pressed={template === id}
               style={{
+                border: "none",
                 padding: "5px 11px",
                 fontSize: "12.5px",
                 color: template === id ? "#fff" : "var(--ink-3)",
@@ -87,7 +98,7 @@ export default function ResumePreview({
               }}
             >
               {label}
-            </div>
+            </button>
           ))}
         </div>
 
@@ -106,8 +117,10 @@ export default function ResumePreview({
           }}
         >
           <button
+            type="button"
+            aria-label="Zoom out"
             onClick={() =>
-              onZoomChange(Math.max(0.5, parseFloat((zoom - 0.1).toFixed(2))))
+              onZoomChange(Math.max(0.4, parseFloat((zoom - 0.1).toFixed(2))))
             }
             style={{
               width: "26px",
@@ -136,6 +149,8 @@ export default function ResumePreview({
             {Math.round(zoom * 100)}%
           </span>
           <button
+            type="button"
+            aria-label="Zoom in"
             onClick={() =>
               onZoomChange(Math.min(1.2, parseFloat((zoom + 0.1).toFixed(2))))
             }
@@ -156,16 +171,23 @@ export default function ResumePreview({
         </div>
       </div>
 
-      {/* Page frame */}
+      {children}
+
+      {/* Page frame: outer box takes the scaled width so small screens never scroll sideways */}
       <div
         style={{
-          position: "relative",
-          width: "640px",
-          transformOrigin: "top center",
-          transform: `scale(${zoom})`,
-          marginBottom: `${-(PAGE_H * (1 - zoom))}px`,
+          width: `${640 * zoom}px`,
+          margin: `0 auto ${-(PAGE_H * (1 - zoom))}px`,
+          flexShrink: 0,
         }}
       >
+        <div
+          style={{
+            width: "640px",
+            transformOrigin: "top left",
+            transform: `scale(${zoom})`,
+          }}
+        >
         <div
           style={{
             width: "640px",
@@ -173,14 +195,15 @@ export default function ResumePreview({
             background: "#fff",
             boxShadow: "var(--shadow-2)",
             borderRadius: "2px",
-            padding: template === "modern" ? 0 : "44px 46px",
+            padding: bleed ? 0 : "44px 46px",
             color: "#111214",
             fontSize: "11.5px",
             lineHeight: 1.55,
-            overflow: template === "modern" ? "hidden" : undefined,
+            overflow: bleed ? "hidden" : undefined,
           }}
         >
           <TemplateComponent d={data} />
+        </div>
         </div>
       </div>
     </div>

@@ -227,6 +227,8 @@ export default function ResumeForm() {
   const [accent, setAccent] = useState("#3a3dd6");
   const [zoom, setZoom] = useState(0.85);
   const [tweaksOpen, setTweaksOpen] = useState(true);
+  // Which pane shows on narrow screens (both show side by side on desktop).
+  const [view, setView] = useState<"edit" | "preview">("edit");
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>(
     {
       personal: true,
@@ -311,6 +313,7 @@ export default function ResumeForm() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
+      setView("edit"); // the error banner lives in the form pane
       setError(
         err instanceof Error
           ? err.message
@@ -324,43 +327,31 @@ export default function ResumeForm() {
   const firstName = (watchedData as Partial<ResumeData>).firstName || "";
   const lastName = (watchedData as Partial<ResumeData>).lastName || "";
 
+  // Invalid fields live in the form pane, so bring it into view on mobile.
+  const generate = handleSubmit(onSubmit, () => setView("edit"));
+
   return (
     <>
       <Topbar
-        firstName={firstName}
-        lastName={lastName}
         onStartEmpty={() => {
           reset(EMPTY_DATA);
           setPhotoBase64(null);
         }}
-        onGeneratePDF={() => handleSubmit(onSubmit)()}
+        onGeneratePDF={() => generate()}
         isGenerating={isGenerating}
       />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(460px, 1fr) minmax(540px, 1.1fr)",
-          height: "calc(100vh - 55px)",
-        }}
-      >
+      <div className="workspace" data-view={view}>
         {/* ---- LEFT: Form ---- */}
         <div
           className="pane"
           style={{
             borderRight: "1px solid var(--line)",
             background: "var(--bg)",
-            overflowY: "auto",
           }}
         >
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div
-              style={{
-                maxWidth: "640px",
-                margin: "0 auto",
-                padding: "24px 28px 120px",
-              }}
-            >
+          <form onSubmit={generate} noValidate>
+            <div className="form-inner">
               {/* Form header */}
               <div style={{ marginBottom: "6px" }}>
                 <h1
@@ -381,8 +372,8 @@ export default function ResumeForm() {
                     margin: "6px 0 0",
                   }}
                 >
-                  Edit on the left, watch the PDF update on the right. Switch
-                  templates anytime.
+                  Fill in each section and the preview updates as you type.
+                  Switch templates anytime.
                 </p>
               </div>
 
@@ -539,8 +530,9 @@ export default function ResumeForm() {
                 />
               </SectionCard>
 
-              {/* Sticky submit bar */}
+              {/* Sticky submit bar (mobile uses the bottom bar instead) */}
               <div
+                className="submit-bar"
                 style={{
                   position: "sticky",
                   bottom: 0,
@@ -568,6 +560,7 @@ export default function ResumeForm() {
                     color: "#fff",
                     fontSize: "13px",
                     fontWeight: 500,
+                    whiteSpace: "nowrap",
                     cursor: isGenerating ? "not-allowed" : "pointer",
                     opacity: isGenerating ? 0.7 : 1,
                     boxShadow:
@@ -598,27 +591,55 @@ export default function ResumeForm() {
           onTemplateChange={setTemplate}
           zoom={zoom}
           onZoomChange={setZoom}
-        />
+        >
+          {/* Floats bottom-right on desktop, sits above the page on mobile */}
+          {tweaksOpen && (
+            <TweaksPanel
+              template={template}
+              onTemplateChange={setTemplate}
+              accent={accent}
+              onAccentChange={setAccent}
+              onClose={() => setTweaksOpen(false)}
+              onLoadSample={() => {
+                reset(SAMPLE_DATA);
+                setPhotoBase64(null);
+              }}
+              onClearAll={() => {
+                reset(EMPTY_DATA);
+                setPhotoBase64(null);
+              }}
+            />
+          )}
+        </ResumePreview>
       </div>
 
-      {/* Tweaks panel */}
-      {tweaksOpen && (
-        <TweaksPanel
-          template={template}
-          onTemplateChange={setTemplate}
-          accent={accent}
-          onAccentChange={setAccent}
-          onClose={() => setTweaksOpen(false)}
-          onLoadSample={() => {
-            reset(SAMPLE_DATA);
-            setPhotoBase64(null);
-          }}
-          onClearAll={() => {
-            reset(EMPTY_DATA);
-            setPhotoBase64(null);
-          }}
-        />
-      )}
+      {/* Mobile bottom bar: pane switch + primary action in thumb reach */}
+      <nav className="tabbar" aria-label="View">
+        <div className="tabbar-switch">
+          {(["edit", "preview"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={view === v}
+              onClick={() => {
+                setView(v);
+                window.scrollTo(0, 0);
+              }}
+            >
+              {v === "edit" ? "Edit" : "Preview"}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="tabbar-primary"
+          onClick={() => generate()}
+          disabled={isGenerating}
+        >
+          <Icon name="download" size={16} />
+          {isGenerating ? "Generating…" : "Generate PDF"}
+        </button>
+      </nav>
     </>
   );
 }
