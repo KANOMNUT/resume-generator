@@ -1,26 +1,32 @@
 import type { Metadata } from "next";
-import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Self-hosted (latin subset, variable weight) so the build never fetches from
+// Google Fonts: Turbopack's next/font/google fails on Google's /l/font?kit= URLs.
+const inter = localFont({
+  src: "./fonts/inter-latin.woff2",
+  weight: "400 700",
   variable: "--font-ui",
   display: "swap",
 });
 
-const sourceSerif4 = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const sourceSerif4 = localFont({
+  src: "./fonts/source-serif-4-latin.woff2",
+  weight: "400 700",
   variable: "--font-serif",
   display: "swap",
+  fallback: ["Georgia", "serif"],
+  adjustFontFallback: "Times New Roman",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrainsMono = localFont({
+  src: "./fonts/jetbrains-mono-latin.woff2",
+  weight: "400 500",
   variable: "--font-mono",
   display: "swap",
+  fallback: ["ui-monospace", "monospace"],
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
